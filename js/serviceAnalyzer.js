@@ -440,9 +440,8 @@ const ServiceAnalyzer = (function () {
     }
 
     function parseJavaMethods(javaCode) {
-        // Xóa các block comment /* ... */
+        // Xóa comments để tránh ảnh hưởng đến regex
         javaCode = javaCode.replace(/\/\*[\s\S]*?\*\//g, '');
-        // Xóa các line comment // ...
         javaCode = javaCode.replace(/\/\/.*/g, '');
 
         const methodRegex = /(@Transactional\([^)]*\)|@Transactional)?\s*public\s+([\w<>,\s]+?)\s+(\w+)\s*\(([^)]*)\)\s*{/g;
@@ -450,10 +449,11 @@ const ServiceAnalyzer = (function () {
         let match;
 
         while ((match = methodRegex.exec(javaCode)) !== null) {
-            const startIdx = match.index + match[0].length;
+            const startIdx = match.index; // Bắt đầu từ đầu phương thức
             let braceCount = 1;
-            let endIdx = startIdx;
+            let endIdx = startIdx + match[0].length; // Bỏ qua phần đã match trước đó
 
+            // Tìm điểm kết thúc của method
             while (braceCount > 0 && endIdx < javaCode.length) {
                 const char = javaCode[endIdx];
                 if (char === '{') braceCount++;
@@ -461,13 +461,15 @@ const ServiceAnalyzer = (function () {
                 endIdx++;
             }
 
-            const methodBody = javaCode.substring(startIdx, endIdx - 1).trim();
+            // Lấy toàn bộ nội dung method
+            const fullMethod = javaCode.substring(startIdx, endIdx).trim();
+
             methods.push({
-                annotation: match[1] ? match[1].trim() : '',
+                fullMethod: fullMethod, // Trả về toàn bộ method
+                annotation: match[1]?.trim() || '',
                 returnType: match[2].trim(),
                 methodName: match[3].trim(),
-                parameters: match[4].trim(),
-                body: methodBody
+                parameters: match[4].trim()
             });
         }
 
