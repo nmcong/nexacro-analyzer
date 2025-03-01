@@ -1,0 +1,561 @@
+<XFDL version="2.0">
+  <Form id="OrderDetail" width="800" height="600" titletext="Order Details" onload="OrderDetail_onload">
+    <Layouts>
+      <Layout>
+        <Div id="divHeader" left="0" top="0" width="100%" height="50" background="#4a6baf">
+          <Components>
+            <Static id="stcTitle" left="20" top="10" width="300" height="30" text="Order Details" color="white" font="bold 16px Arial"/>
+            <Button id="btnClose" right="20" top="10" width="80" height="30" text="Close"/>
+          </Components>
+        </Div>
+
+        <Div id="divOrderInfo" left="20" top="70" width="760" height="120" background="#f8f8f8" border="1px solid #ddd">
+          <Components>
+            <Static id="stcOrderIdLabel" left="20" top="20" width="100" height="25" text="Order ID:" font="bold 12px Arial"/>
+            <Static id="stcOrderId" left="130" top="20" width="150" height="25" text=""/>
+
+            <Static id="stcCustomerLabel" left="20" top="50" width="100" height="25" text="Customer:" font="bold 12px Arial"/>
+            <Static id="stcCustomer" left="130" top="50" width="150" height="25" text=""/>
+
+            <Static id="stcDateLabel" left="20" top="80" width="100" height="25" text="Order Date:" font="bold 12px Arial"/>
+            <Static id="stcDate" left="130" top="80" width="150" height="25" text=""/>
+
+            <Static id="stcStatusLabel" left="400" top="20" width="100" height="25" text="Status:" font="bold 12px Arial"/>
+            <Static id="stcStatus" left="510" top="20" width="150" height="25" text=""/>
+
+            <Static id="stcTotalLabel" left="400" top="50" width="100" height="25" text="Total Amount:" font="bold 12px Arial"/>
+            <Static id="stcTotal" left="510" top="50" width="150" height="25" text=""/>
+
+            <Static id="stcPaymentLabel" left="400" top="80" width="100" height="25" text="Payment:" font="bold 12px Arial"/>
+            <Static id="stcPayment" left="510" top="80" width="150" height="25" text=""/>
+          </Components>
+        </Div>
+
+        <Div id="divTabs" left="20" top="200" width="760" height="30">
+          <Components>
+            <Button id="btnTabItems" left="0" top="0" width="120" height="30" text="Order Items" class="tab_button selected"/>
+            <Button id="btnTabHistory" left="125" top="0" width="120" height="30" text="History" class="tab_button"/>
+            <Button id="btnTabNotes" left="250" top="0" width="120" height="30" text="Notes" class="tab_button"/>
+            <Button id="btnTabDocuments" left="375" top="0" width="120" height="30" text="Documents" class="tab_button"/>
+          </Components>
+        </Div>
+
+        <Div id="divTabContent" left="20" top="230" width="760" height="320" border="1px solid #ddd">
+          <Components>
+            <!-- Order Items Tab -->
+            <Grid id="grdOrderItems" left="0" top="0" width="100%" height="100%" visible="true" binddataset="dsOrderItems">
+              <Formats>
+                <Format id="default">
+                  <Columns>
+                    <Column size="60"/>
+                    <Column size="300"/>
+                    <Column size="80"/>
+                    <Column size="100"/>
+                    <Column size="100"/>
+                    <Column size="120"/>
+                  </Columns>
+                  <Rows>
+                    <Row size="30" band="head"/>
+                    <Row size="30"/>
+                  </Rows>
+                  <Band id="head">
+                    <Cell text="Item #"/>
+                    <Cell col="1" text="Product"/>
+                    <Cell col="2" text="Quantity"/>
+                    <Cell col="3" text="Unit Price"/>
+                    <Cell col="4" text="Discount"/>
+                    <Cell col="5" text="Total"/>
+                  </Band>
+                  <Band id="body">
+                    <Cell text="bind:itemNo"/>
+                    <Cell col="1" text="bind:productName"/>
+                    <Cell col="2" text="bind:quantity"/>
+                    <Cell col="3" text="bind:unitPrice"/>
+                    <Cell col="4" text="bind:discount"/>
+                    <Cell col="5" text="bind:total"/>
+                  </Band>
+                </Format>
+              </Formats>
+            </Grid>
+
+            <!-- History Tab -->
+            <Grid id="grdOrderHistory" left="0" top="0" width="100%" height="100%" visible="false" binddataset="dsOrderHistory">
+              <Formats>
+                <Format id="default">
+                  <Columns>
+                    <Column size="120"/>
+                    <Column size="120"/>
+                    <Column size="150"/>
+                    <Column size="370"/>
+                  </Columns>
+                  <Rows>
+                    <Row size="30" band="head"/>
+                    <Row size="30"/>
+                  </Rows>
+                  <Band id="head">
+                    <Cell text="Date"/>
+                    <Cell col="1" text="Status"/>
+                    <Cell col="2" text="User"/>
+                    <Cell col="3" text="Comments"/>
+                  </Band>
+                  <Band id="body">
+                    <Cell text="bind:date"/>
+                    <Cell col="1" text="bind:status"/>
+                    <Cell col="2" text="bind:user"/>
+                    <Cell col="3" text="bind:comments"/>
+                  </Band>
+                </Format>
+              </Formats>
+            </Grid>
+
+            <!-- Notes Tab -->
+            <TextArea id="txtNotes" left="10" top="10" width="740" height="300" visible="false"/>
+
+            <Grid id="grdDocuments" left="0" top="0" width="100%" height="270" visible="false" binddataset="dsOrderDocuments">
+              <Formats>
+                <Format id="default">
+                  <Columns>
+                    <Column size="50"/>
+                    <Column size="250"/>
+                    <Column size="120"/>
+                    <Column size="120"/>
+                    <Column size="120"/>
+                    <Column size="100"/>
+                  </Columns>
+                  <Rows>
+                    <Row size="30" band="head"/>
+                    <Row size="30"/>
+                  </Rows>
+                  <Band id="head">
+                    <Cell text="ID"/>
+                    <Cell col="1" text="Document Name"/>
+                    <Cell col="2" text="Type"/>
+                    <Cell col="3" text="Uploaded By"/>
+                    <Cell col="4" text="Uploaded Date"/>
+                    <Cell col="5" text="Actions"/>
+                  </Band>
+                  <Band id="body">
+                    <Cell text="bind:documentId"/>
+                    <Cell col="1" text="bind:documentName"/>
+                    <Cell col="2" text="bind:documentType"/>
+                    <Cell col="3" text="bind:uploadedBy"/>
+                    <Cell col="4" text="bind:uploadDate"/>
+                    <Cell col="5" displaytype="buttoncontrol" text="Download"/>
+                  </Band>
+                </Format>
+              </Formats>
+            </Grid>
+            <Button id="btnUploadDocument" left="10" top="280" width="120" height="30" visible="false" text="Upload Document"/>
+            </Components>
+                    </Div>
+
+                    <Div id="divButtons" left="20" bottom="20" width="760" height="40">
+                      <Components>
+                        <Button id="btnEdit" left="0" top="0" width="100" height="40" text="Edit Order"/>
+                        <Button id="btnPrint" left="110" top="0" width="100" height="40" text="Print"/>
+                        <Button id="btnEmail" left="220" top="0" width="100" height="40" text="Email"/>
+                        <Button id="btnStatusChange" right="110" top="0" width="120" height="40" text="Change Status"/>
+                        <Button id="btnCancel" right="0" top="0" width="100" height="40" text="Cancel Order"/>
+                      </Components>
+                    </Div>
+                  </Layout>
+                </Layouts>
+
+                <Objects>
+                  <Dataset id="dsOrderDetail">
+                    <ColumnInfo>
+                      <Column id="orderId" type="STRING" size="20"/>
+                      <Column id="customerName" type="STRING" size="100"/>
+                      <Column id="orderDate" type="STRING" size="20"/>
+                      <Column id="status" type="STRING" size="20"/>
+                      <Column id="totalAmount" type="FLOAT" size="8"/>
+                      <Column id="paymentMethod" type="STRING" size="50"/>
+                      <Column id="paymentStatus" type="STRING" size="20"/>
+                      <Column id="shippingAddress" type="STRING" size="200"/>
+                      <Column id="shippingMethod" type="STRING" size="50"/>
+                      <Column id="trackingNumber" type="STRING" size="50"/>
+                      <Column id="notes" type="STRING" size="1000"/>
+                    </ColumnInfo>
+                  </Dataset>
+
+                  <Dataset id="dsOrderItems">
+                    <ColumnInfo>
+                      <Column id="itemNo" type="INT" size="4"/>
+                      <Column id="productId" type="STRING" size="20"/>
+                      <Column id="productName" type="STRING" size="100"/>
+                      <Column id="quantity" type="INT" size="4"/>
+                      <Column id="unitPrice" type="FLOAT" size="8"/>
+                      <Column id="discount" type="FLOAT" size="8"/>
+                      <Column id="total" type="FLOAT" size="8"/>
+                    </ColumnInfo>
+                  </Dataset>
+
+                  <Dataset id="dsOrderHistory">
+                    <ColumnInfo>
+                      <Column id="date" type="STRING" size="20"/>
+                      <Column id="status" type="STRING" size="20"/>
+                      <Column id="user" type="STRING" size="50"/>
+                      <Column id="comments" type="STRING" size="200"/>
+                    </ColumnInfo>
+                  </Dataset>
+
+                  <Dataset id="dsOrderDocuments">
+                    <ColumnInfo>
+                      <Column id="documentId" type="STRING" size="20"/>
+                      <Column id="documentName" type="STRING" size="100"/>
+                      <Column id="documentType" type="STRING" size="50"/>
+                      <Column id="uploadedBy" type="STRING" size="50"/>
+                      <Column id="uploadDate" type="STRING" size="20"/>
+                      <Column id="filePath" type="STRING" size="200"/>
+                    </ColumnInfo>
+                  </Dataset>
+                </Objects>
+
+                <Script>
+                  // Form initialization
+                  this.OrderDetail_onload = function() {
+                    // Get order ID from parameters
+                    this.orderId = this.parent.orderId;
+
+                    // Initialize service
+                    this.fn_initService();
+
+                    // Load order data
+                    this.fn_loadOrderData();
+
+                    // Set up tab events
+                    this.fn_initTabEvents();
+                  };
+
+                  // Initialize service datasets
+                  this.fn_initService = function() {
+                    // Service dataset for order operations
+                    this.dsOrderService = new Dataset("dsOrderService");
+                    this.dsOrderService.addColumn("tranId", "string");
+                    this.dsOrderService.addColumn("svcId", "string");
+                    this.dsOrderService.addColumn("inDss", "string");
+                    this.dsOrderService.addColumn("outDs", "string");
+                    this.dsOrderService.addColumn("argvs", "string");
+                    this.dsOrderService.addColumn("cback", "string");
+                    this.dsOrderService.addColumn("async", "boolean");
+
+                    // Order detail service
+                    this.dsOrderService.addRow();
+                    this.dsOrderService.setColumn(0, "tranId", "order_detail");
+                    this.dsOrderService.setColumn(0, "svcId", "orderService.getOrderDetail");
+                    this.dsOrderService.setColumn(0, "inDss", "");
+                    this.dsOrderService.setColumn(0, "outDs", "dsOrderDetail=orderDetail dsOrderItems=orderItems dsOrderHistory=orderHistory dsOrderDocuments=orderDocuments");
+                    this.dsOrderService.setColumn(0, "argvs", "orderId=" + this.orderId);
+                    this.dsOrderService.setColumn(0, "cback", "fn_orderDetailCallback");
+                    this.dsOrderService.setColumn(0, "async", true);
+
+                    // Order status change service
+                    this.dsOrderService.addRow();
+                    this.dsOrderService.setColumn(1, "tranId", "change_status");
+                    this.dsOrderService.setColumn(1, "svcId", "orderService.changeOrderStatus");
+                    this.dsOrderService.setColumn(1, "inDss", "dsStatusChange=statusChange");
+                    this.dsOrderService.setColumn(1, "outDs", "");
+                    this.dsOrderService.setColumn(1, "argvs", "userId=" + this.gfnGetUserId());
+                    this.dsOrderService.setColumn(1, "cback", "fn_statusChangeCallback");
+                    this.dsOrderService.setColumn(1, "async", false);
+
+                    // Order cancel service
+                    this.dsOrderService.addRow();
+                    this.dsOrderService.setColumn(2, "tranId", "cancel_order");
+                    this.dsOrderService.setColumn(2, "svcId", "orderService.cancelOrder");
+                    this.dsOrderService.setColumn(2, "inDss", "dsCancelReason=cancelReason");
+                    this.dsOrderService.setColumn(2, "outDs", "");
+                    this.dsOrderService.setColumn(2, "argvs", "orderId=" + this.orderId + " userId=" + this.gfnGetUserId());
+                    this.dsOrderService.setColumn(2, "cback", "fn_cancelOrderCallback");
+                    this.dsOrderService.setColumn(2, "async", false);
+
+                    // Order notes update service
+                    this.dsOrderService.addRow();
+                    this.dsOrderService.setColumn(3, "tranId", "save_notes");
+                    this.dsOrderService.setColumn(3, "svcId", "orderService.updateOrderNotes");
+                    this.dsOrderService.setColumn(3, "inDss", "dsNotesParam=notesParam");
+                    this.dsOrderService.setColumn(3, "outDs", "");
+                    this.dsOrderService.setColumn(3, "argvs", "orderId=" + this.orderId + " userId=" + this.gfnGetUserId());
+                    this.dsOrderService.setColumn(3, "cback", "fn_saveNotesCallback");
+                    this.dsOrderService.setColumn(3, "async", true);
+
+                    // Document upload service
+                    this.dsOrderService.addRow();
+                    this.dsOrderService.setColumn(4, "tranId", "upload_document");
+                    this.dsOrderService.setColumn(4, "svcId", "documentService.uploadOrderDocument");
+                    this.dsOrderService.setColumn(4, "inDss", "dsUploadParam=uploadParam");
+                    this.dsOrderService.setColumn(4, "outDs", "dsNewDocument=newDocument");
+                    this.dsOrderService.setColumn(4, "argvs", "orderId=" + this.orderId + " userId=" + this.gfnGetUserId());
+                    this.dsOrderService.setColumn(4, "cback", "fn_uploadDocumentCallback");
+                    this.dsOrderService.setColumn(4, "async", true);
+                  };
+
+                  // Load order data
+                  this.fn_loadOrderData = function() {
+                    // Call order detail service
+                    this.gfnCallService("order_detail");
+                  };
+
+                  // Initialize tab events
+                  this.fn_initTabEvents = function() {
+                    // Tab Items
+                    this.divTabs.form.btnTabItems.addEventHandler("onclick", this.fn_onTabClick, this);
+
+                    // Tab History
+                    this.divTabs.form.btnTabHistory.addEventHandler("onclick", this.fn_onTabClick, this);
+
+                    // Tab Notes
+                    this.divTabs.form.btnTabNotes.addEventHandler("onclick", this.fn_onTabClick, this);
+
+                    // Tab Documents
+                    this.divTabs.form.btnTabDocuments.addEventHandler("onclick", this.fn_onTabClick, this);
+                  };
+
+                  // Tab click event handler
+                  this.fn_onTabClick = function(obj, e) {
+                    // Remove selected class from all tabs
+                    this.divTabs.form.btnTabItems.set_cssclass("tab_button");
+                    this.divTabs.form.btnTabHistory.set_cssclass("tab_button");
+                    this.divTabs.form.btnTabNotes.set_cssclass("tab_button");
+                    this.divTabs.form.btnTabDocuments.set_cssclass("tab_button");
+
+                    // Hide all tab content
+                    this.divTabContent.form.grdOrderItems.set_visible(false);
+                    this.divTabContent.form.grdOrderHistory.set_visible(false);
+                    this.divTabContent.form.txtNotes.set_visible(false);
+                    this.divTabContent.form.grdDocuments.set_visible(false);
+                    this.divTabContent.form.btnUploadDocument.set_visible(false);
+
+                    // Set selected tab and show content
+                    obj.set_cssclass("tab_button selected");
+
+                    if (obj.id === "btnTabItems") {
+                      this.divTabContent.form.grdOrderItems.set_visible(true);
+                    } else if (obj.id === "btnTabHistory") {
+                      this.divTabContent.form.grdOrderHistory.set_visible(true);
+                    } else if (obj.id === "btnTabNotes") {
+                      this.divTabContent.form.txtNotes.set_visible(true);
+                      this.divTabContent.form.txtNotes.set_value(this.dsOrderDetail.getColumn(0, "notes"));
+                    } else if (obj.id === "btnTabDocuments") {
+                      this.divTabContent.form.grdDocuments.set_visible(true);
+                      this.divTabContent.form.btnUploadDocument.set_visible(true);
+                    }
+                  };
+
+                  // Order detail callback
+                  this.fn_orderDetailCallback = function(trId, errorCode, errorMsg) {
+                    if (errorCode != 0) {
+                      this.gfnOpenPopup("msgPopup", "common::MessagePopup.xfdl", {message: "Failed to load order details: " + errorMsg, type: "error"}, "fn_msgCallback");
+                      return;
+                    }
+
+                    // Update UI with order data
+                    this.fn_updateOrderInfo();
+                  };
+
+                  // Update order information in UI
+                  this.fn_updateOrderInfo = function() {
+                    // Get order data
+                    const order = this.dsOrderDetail.getRowObject(0);
+
+                    // Update header information
+                    this.divOrderInfo.form.stcOrderId.set_text(order.orderId);
+                    this.divOrderInfo.form.stcCustomer.set_text(order.customerName);
+                    this.divOrderInfo.form.stcDate.set_text(order.orderDate);
+                    this.divOrderInfo.form.stcStatus.set_text(order.status);
+                    this.divOrderInfo.form.stcTotal.set_text(this.gfnFormatCurrency(order.totalAmount));
+                    this.divOrderInfo.form.stcPayment.set_text(order.paymentMethod + " (" + order.paymentStatus + ")");
+
+                    // Enable/disable actions based on order status
+                    this.fn_updateActionButtons(order.status);
+                  };
+
+                  // Update action buttons based on order status
+                  this.fn_updateActionButtons = function(status) {
+                    // Enable/disable buttons depending on order status
+                    if (status === "Completed" || status === "Cancelled") {
+                      this.divButtons.form.btnEdit.set_enable(false);
+                      this.divButtons.form.btnStatusChange.set_enable(false);
+                      this.divButtons.form.btnCancel.set_enable(false);
+                    } else if (status === "Processing") {
+                      this.divButtons.form.btnEdit.set_enable(true);
+                      this.divButtons.form.btnStatusChange.set_enable(true);
+                      this.divButtons.form.btnCancel.set_enable(true);
+                    } else if (status === "Pending") {
+                      this.divButtons.form.btnEdit.set_enable(true);
+                      this.divButtons.form.btnStatusChange.set_enable(true);
+                      this.divButtons.form.btnCancel.set_enable(true);
+                    }
+                  };
+
+                  // Close button click
+                  this.divHeader_btnClose_onclick = function(obj, e) {
+                    this.close();
+                  };
+
+                  // Edit order button click
+                  this.divButtons_btnEdit_onclick = function(obj, e) {
+                    this.gfnOpenPopup("editOrderPopup", "order::OrderCreation.xfdl", {orderId: this.orderId, mode: "edit"}, "fn_editOrderCallback", "modal=true,width=900,height=700");
+                  };
+
+                  // Print button click
+                  this.divButtons_btnPrint_onclick = function(obj, e) {
+                    this.gfnOpenPopup("printPopup", "order::OrderPrint.xfdl", {orderId: this.orderId}, "fn_printCallback", "modal=true,width=800,height=600");
+                  };
+
+                  // Email button click
+                  this.divButtons_btnEmail_onclick = function(obj, e) {
+                    this.gfnOpenPopup("emailPopup", "common::EmailSender.xfdl", {
+                      templateType: "order",
+                      templateId: "ORDER_DETAILS",
+                      subject: "Order Details: " + this.orderId,
+                      to: this.dsOrderDetail.getColumn(0, "customerEmail"),
+                      orderId: this.orderId
+                    }, "fn_emailCallback", "modal=true,width=600,height=500");
+                  };
+
+                  // Change status button click
+                  this.divButtons_btnStatusChange_onclick = function(obj, e) {
+                    this.gfnOpenPopup("statusChangePopup", "order::OrderStatusChange.xfdl", {
+                      orderId: this.orderId,
+                      currentStatus: this.dsOrderDetail.getColumn(0, "status")
+                    }, "fn_statusChangeCallback", "modal=true,width=500,height=300");
+                  };
+
+                  // Cancel order button click
+                  this.divButtons_btnCancel_onclick = function(obj, e) {
+                    if (confirm("Are you sure you want to cancel this order? This action cannot be undone.")) {
+                      this.gfnOpenPopup("cancelReasonPopup", "order::CancelReason.xfdl", {orderId: this.orderId}, "fn_cancelReasonCallback", "modal=true,width=500,height=300");
+                    }
+                  };
+
+                  // Upload document button click
+                  this.divTabContent_btnUploadDocument_onclick = function(obj, e) {
+                    this.gfnOpenPopup("uploadPopup", "common::FileUpload.xfdl", {
+                      referenceType: "ORDER",
+                      referenceId: this.orderId,
+                      allowedTypes: "pdf,doc,docx,jpg,png,xls,xlsx"
+                    }, "fn_uploadCallback", "modal=true,width=600,height=400");
+                  };
+
+                  // Status change callback
+                  this.fn_statusChangeCallback = function(popupId, rtnVal) {
+                    if (rtnVal && rtnVal.result === "OK") {
+                      // Create dataset with status change info
+                      this.dsStatusChange = new Dataset("dsStatusChange");
+                      this.dsStatusChange.addColumn("orderId", "string");
+                      this.dsStatusChange.addColumn("newStatus", "string");
+                      this.dsStatusChange.addColumn("comments", "string");
+
+                      this.dsStatusChange.addRow();
+                      this.dsStatusChange.setColumn(0, "orderId", this.orderId);
+                      this.dsStatusChange.setColumn(0, "newStatus", rtnVal.newStatus);
+                      this.dsStatusChange.setColumn(0, "comments", rtnVal.comments);
+
+                      // Call status change service
+                      this.gfnCallService("change_status");
+                    }
+                  };
+
+                  // Cancel reason callback
+                  this.fn_cancelReasonCallback = function(popupId, rtnVal) {
+                    if (rtnVal && rtnVal.result === "OK") {
+                      // Create dataset with cancel reason
+                      this.dsCancelReason = new Dataset("dsCancelReason");
+                      this.dsCancelReason.addColumn("orderId", "string");
+                      this.dsCancelReason.addColumn("reason", "string");
+
+                      this.dsCancelReason.addRow();
+                      this.dsCancelReason.setColumn(0, "orderId", this.orderId);
+                      this.dsCancelReason.setColumn(0, "reason", rtnVal.reason);
+
+                      // Call cancel order service
+                      this.gfnCallService("cancel_order");
+                    }
+                  };
+
+                  // Notes tab lost focus - Auto save
+                  this.divTabContent_txtNotes_onkillfocus = function(obj, e) {
+                    const notes = obj.value;
+                    const originalNotes = this.dsOrderDetail.getColumn(0, "notes");
+
+                    // Only save if notes have changed
+                    if (notes !== originalNotes) {
+                      // Create dataset with new notes
+                      this.dsNotesParam = new Dataset("dsNotesParam");
+                      this.dsNotesParam.addColumn("orderId", "string");
+                      this.dsNotesParam.addColumn("notes", "string");
+
+                      this.dsNotesParam.addRow();
+                      this.dsNotesParam.setColumn(0, "orderId", this.orderId);
+                      this.dsNotesParam.setColumn(0, "notes", notes);
+
+                      // Call save notes service
+                      this.gfnCallService("save_notes");
+                    }
+                  };
+
+                  // Document download
+                  this.divTabContent_grdDocuments_oncellclick = function(obj, e) {
+                    // Check if Download button clicked
+                    if (e.col === 5) {
+                      const documentId = this.dsOrderDocuments.getColumn(e.row, "documentId");
+                      const documentName = this.dsOrderDocuments.getColumn(e.row, "documentName");
+                      const filePath = this.dsOrderDocuments.getColumn(e.row, "filePath");
+
+                      // Download document
+                      this.gfnDownloadFile(filePath, documentName);
+                    }
+                  };
+
+                  // Upload document callback
+                  this.fn_uploadCallback = function(popupId, rtnVal) {
+                    if (rtnVal && rtnVal.result === "OK") {
+                      // Create upload parameters
+                      this.dsUploadParam = new Dataset("dsUploadParam");
+                      this.dsUploadParam.addColumn("orderId", "string");
+                      this.dsUploadParam.addColumn("fileId", "string");
+                      this.dsUploadParam.addColumn("documentName", "string");
+                      this.dsUploadParam.addColumn("documentType", "string");
+
+                      this.dsUploadParam.addRow();
+                      this.dsUploadParam.setColumn(0, "orderId", this.orderId);
+                      this.dsUploadParam.setColumn(0, "fileId", rtnVal.fileId);
+                      this.dsUploadParam.setColumn(0, "documentName", rtnVal.fileName);
+                      this.dsUploadParam.setColumn(0, "documentType", rtnVal.fileType);
+
+                      // Call upload document service
+                      this.gfnCallService("upload_document");
+                    }
+                  };
+
+                  // Upload document service callback
+                  this.fn_uploadDocumentCallback = function(trId, errorCode, errorMsg) {
+                    if (errorCode != 0) {
+                      this.gfnOpenPopup("msgPopup", "common::MessagePopup.xfdl", {message: "Failed to upload document: " + errorMsg, type: "error"}, "fn_msgCallback");
+                      return;
+                    }
+
+                    // Add new document to grid
+                    const newDoc = this.dsNewDocument.getRowObject(0);
+                    this.dsOrderDocuments.addRow();
+                    const newRow = this.dsOrderDocuments.getRowCount() - 1;
+
+                    this.dsOrderDocuments.setColumn(newRow, "documentId", newDoc.documentId);
+                    this.dsOrderDocuments.setColumn(newRow, "documentName", newDoc.documentName);
+                    this.dsOrderDocuments.setColumn(newRow, "documentType", newDoc.documentType);
+                    this.dsOrderDocuments.setColumn(newRow, "uploadedBy", newDoc.uploadedBy);
+                    this.dsOrderDocuments.setColumn(newRow, "uploadDate", newDoc.uploadDate);
+                    this.dsOrderDocuments.setColumn(newRow, "filePath", newDoc.filePath);
+
+                    // Show success message
+                    this.gfnOpenPopup("msgPopup", "common::MessagePopup.xfdl", {message: "Document uploaded successfully.", type: "info"}, "fn_msgCallback");
+                  };
+
+                  // Format currency helper function
+                  this.gfnFormatCurrency = function(amount) {
+                    return "$" + parseFloat(amount).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                  };
+                </Script>
+              </Form>
+            </XFDL>

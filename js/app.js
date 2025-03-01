@@ -120,8 +120,6 @@ document.addEventListener('DOMContentLoaded', function () {
         UIManager.filterScreenList(query);
     });
 
-    // Trong phần document.addEventListener('DOMContentLoaded', function () {
-    // Thêm tham chiếu đến nút import
     const importDataBtn = document.getElementById('importDataBtn');
 
     // Xử lý sự kiện import dữ liệu

@@ -1,0 +1,703 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.erp.dao.OrderDao">
+    <!-- Search orders with various criteria -->
+    <select id="selectOrderList" parameterType="map" resultType="map">
+        SELECT
+        o.order_id AS orderId,
+        o.order_no AS orderNo,
+        o.customer_id AS customerId,
+        c.customer_name AS customerName,
+        o.order_date AS orderDate,
+        o.status,
+        o.payment_status AS paymentStatus,
+        o.shipping_status AS shippingStatus,
+        o.total_amount AS totalAmount,
+        o.discount_amount AS discountAmount,
+        o.tax_amount AS taxAmount,
+        o.net_amount AS netAmount,
+        o.shipping_address AS shippingAddress,
+        o.shipping_method AS shippingMethod,
+        o.payment_method AS paymentMethod,
+        o.notes,
+        o.creation_date AS creationDate,
+        o.created_by AS createdBy,
+        (SELECT COUNT(*) FROM order_items oi WHERE oi.order_id = o.order_id) AS itemCount
+        FROM
+        orders o
+        JOIN
+        customers c ON o.customer_id = c.customer_id
+        WHERE
+        1=1
+        <if test="orderId != null and orderId != ''">
+            AND o.order_id = #{orderId}
+        </if>
+        <if test="orderNo != null and orderNo != ''">
+            AND o.order_no LIKE '%' || #{orderNo} || '%'
+        </if>
+        <if test="customerId != null and customerId != ''">
+            AND o.customer_id = #{customerId}
+        </if>
+        <if test="customerName != null and customerName != ''">
+            AND UPPER(c.customer_name) LIKE '%' || UPPER(#{customerName}) || '%'
+        </if>
+        <if test="status != null and status != '' and status != 'ALL'">
+            AND o.status = #{status}
+        </if>
+        <if test="paymentStatus != null and paymentStatus != '' and paymentStatus != 'ALL'">
+            AND o.payment_status = #{paymentStatus}
+        </if>
+        <if test="shippingStatus != null and shippingStatus != '' and shippingStatus != 'ALL'">
+            AND o.shipping_status = #{shippingStatus}
+        </if>
+        <if test="fromDate != null">
+            AND o.order_date >= #{fromDate}
+        </if>
+        <if test="toDate != null">
+            AND o.order_date &lt;= #{toDate}
+        </if>
+        <if test="minAmount != null">
+            AND o.total_amount >= #{minAmount}
+        </if>
+        <if test="maxAmount != null">
+            AND o.total_amount &lt;= #{maxAmount}
+        </if>
+        <if test="productId != null and productId != ''">
+            AND EXISTS (
+            SELECT 1 FROM order_items oi
+            WHERE oi.order_id = o.order_id
+            AND oi.product_id = #{productId}
+            )
+        </if>
+        ORDER BY
+        <choose>
+            <when test="sortColumn != null and sortColumn == 'customerName'">c.customer_name</when>
+            <when test="sortColumn != null and sortColumn == 'orderDate'">o.order_date</when>
+            <when test="sortColumn != null and sortColumn == 'totalAmount'">o.total_amount</when>
+            <otherwise>o.order_date</otherwise>
+        </choose>
+        <if test="sortDirection != null and sortDirection.toUpperCase() == 'DESC'">DESC</if>
+        <if test="sortDirection == null or sortDirection.toUpperCase() != 'DESC'">ASC</if>
+    </select>
+
+    <!-- Count total orders matching criteria (for pagination) -->
+    <select id="countOrders" parameterType="map" resultType="int">
+        SELECT
+        COUNT(*)
+        FROM
+        orders o
+        JOIN
+        customers c ON o.customer_id = c.customer_id
+        WHERE
+        1=1
+        <if test="orderId != null and orderId != ''">
+            AND o.order_id = #{orderId}
+        </if>
+        <if test="orderNo != null and orderNo != ''">
+            AND o.order_no LIKE '%' || #{orderNo} || '%'
+        </if>
+        <if test="customerId != null and customerId != ''">
+            AND o.customer_id = #{customerId}
+        </if>
+        <if test="customerName != null and customerName != ''">
+            AND UPPER(c.customer_name) LIKE '%' || UPPER(#{customerName}) || '%'
+        </if>
+        <if test="status != null and status != '' and status != 'ALL'">
+            AND o.status = #{status}
+        </if>
+        <if test="paymentStatus != null and paymentStatus != '' and paymentStatus != 'ALL'">
+            AND o.payment_status = #{paymentStatus}
+        </if>
+        <if test="shippingStatus != null and shippingStatus != '' and shippingStatus != 'ALL'">
+            AND o.shipping_status = #{shippingStatus}
+        </if>
+        <if test="fromDate != null">
+            AND o.order_date >= #{fromDate}
+        </if>
+        <if test="toDate != null">
+            AND o.order_date &lt;= #{toDate}
+        </if>
+        <if test="minAmount != null">
+            AND o.total_amount >= #{minAmount}
+        </if>
+        <if test="maxAmount != null">
+            AND o.total_amount &lt;= #{maxAmount}
+        </if>
+        <if test="productId != null and productId != ''">
+            AND EXISTS (
+            SELECT 1 FROM order_items oi
+            WHERE oi.order_id = o.order_id
+            AND oi.product_id = #{productId}
+            )
+        </if>
+    </select>
+
+
+
+    <!-- Get order items -->
+    <select id="selectOrderItems" parameterType="string" resultType="map">
+        SELECT
+            oi.order_item_id AS orderItemId,
+            oi.order_id AS orderId,
+            oi.line_number AS lineNumber,
+            oi.product_id AS productId,
+            p.product_name AS productName,
+            p.product_code AS productCode,
+            oi.quantity,
+            oi.unit_price AS unitPrice,
+            oi.discount_percent AS discountPercent,
+            oi.discount_amount AS discountAmount,
+            oi.tax_percent AS taxPercent,
+            oi.tax_amount AS taxAmount,
+            oi.line_total AS lineTotal,
+            oi.notes
+        FROM
+            order_items oi
+                JOIN
+            products p ON oi.product_id = p.product_id
+        WHERE
+            oi.order_id = #{orderId}
+        ORDER BY
+            oi.line_number
+    </select>
+
+    <!-- Get order history -->
+    <select id="selectOrderHistory" parameterType="string" resultType="map">
+        SELECT
+            h.history_id AS historyId,
+            h.order_id AS orderId,
+            h.action_date AS actionDate,
+            h.action_type AS actionType,
+            h.previous_status AS previousStatus,
+            h.new_status AS newStatus,
+            h.comments,
+            h.performed_by AS performedBy,
+            u.user_name AS userName,
+            h.ip_address AS ipAddress
+        FROM
+            order_history h
+                LEFT JOIN
+            users u ON h.performed_by = u.user_id
+        WHERE
+            h.order_id = #{orderId}
+        ORDER BY
+            h.action_date DESC
+    </select>
+
+    <!-- Get order documents -->
+    <select id="selectOrderDocuments" parameterType="string" resultType="map">
+        SELECT
+            d.document_id AS documentId,
+            d.reference_id AS referenceId,
+            d.document_name AS documentName,
+            d.document_type AS documentType,
+            d.file_path AS filePath,
+            d.file_size AS fileSize,
+            d.uploaded_by AS uploadedBy,
+            u.user_name AS uploaderName,
+            d.upload_date AS uploadDate
+        FROM
+            documents d
+                LEFT JOIN
+            users u ON d.uploaded_by = u.user_id
+        WHERE
+            d.reference_type = 'ORDER'
+          AND d.reference_id = #{orderId}
+        ORDER BY
+            d.upload_date DESC
+    </select>
+
+    <!-- Create new order -->
+    <insert id="insertOrder" parameterType="map">
+        <selectKey keyProperty="orderId" resultType="string" order="BEFORE">
+            SELECT order_seq.NEXTVAL AS orderId FROM DUAL
+        </selectKey>
+        INSERT INTO orders (
+        order_id,
+        order_no,
+        customer_id,
+        order_date,
+        status,
+        payment_status,
+        shipping_status,
+        total_amount,
+        discount_amount,
+        tax_amount,
+        net_amount,
+        shipping_address,
+        shipping_method,
+        payment_method,
+        notes,
+        created_by,
+        creation_date,
+        last_updated_by,
+        last_update_date
+        ) VALUES (
+        #{orderId},
+        'ORD-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || LPAD(#{orderId}, 6, '0'),
+        #{customerId},
+        SYSDATE,
+        #{status, jdbcType=VARCHAR},
+        #{paymentStatus, jdbcType=VARCHAR},
+        #{shippingStatus, jdbcType=VARCHAR},
+        #{totalAmount, jdbcType=NUMERIC},
+        #{discountAmount, jdbcType=NUMERIC},
+        #{taxAmount, jdbcType=NUMERIC},
+        #{netAmount, jdbcType=NUMERIC},
+        #{shippingAddress, jdbcType=VARCHAR},
+        #{shippingMethod, jdbcType=VARCHAR},
+        #{paymentMethod, jdbcType=VARCHAR},
+        #{notes, jdbcType=VARCHAR},
+        #{createdBy},
+        SYSDATE,
+        #{createdBy},
+        SYSDATE
+        )
+    </insert>
+
+    <!-- Add order item -->
+    <insert id="insertOrderItem" parameterType="map">
+        <selectKey keyProperty="orderItemId" resultType="string" order="BEFORE">
+            SELECT order_item_seq.NEXTVAL AS orderItemId FROM DUAL
+        </selectKey>
+        INSERT INTO order_items (
+        order_item_id,
+        order_id,
+        line_number,
+        product_id,
+        quantity,
+        unit_price,
+        discount_percent,
+        discount_amount,
+        tax_percent,
+        tax_amount,
+        line_total,
+        notes,
+        created_by,
+        creation_date
+        ) VALUES (
+        #{orderItemId},
+        #{orderId},
+        #{lineNumber},
+        #{productId},
+        #{quantity},
+        #{unitPrice},
+        #{discountPercent, jdbcType=NUMERIC},
+        #{discountAmount, jdbcType=NUMERIC},
+        #{taxPercent, jdbcType=NUMERIC},
+        #{taxAmount, jdbcType=NUMERIC},
+        #{lineTotal},
+        #{notes, jdbcType=VARCHAR},
+        #{createdBy},
+        SYSDATE
+        )
+    </insert>
+
+    <!-- Update order details -->
+    <update id="updateOrder" parameterType="map">
+        UPDATE orders
+        SET
+        <if test="customerId != null">customer_id = #{customerId},</if>
+        <if test="status != null">status = #{status},</if>
+        <if test="paymentStatus != null">payment_status = #{paymentStatus},</if>
+        <if test="shippingStatus != null">shipping_status = #{shippingStatus},</if>
+        <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+        <if test="discountAmount != null">discount_amount = #{discountAmount},</if>
+        <if test="taxAmount != null">tax_amount = #{taxAmount},</if>
+        <if test="netAmount != null">net_amount = #{netAmount},</if>
+        <if test="shippingAddress != null">shipping_address = #{shippingAddress},</if>
+        <if test="shippingMethod != null">shipping_method = #{shippingMethod},</if>
+        <if test="trackingNumber != null">tracking_number = #{trackingNumber},</if>
+        <if test="paymentMethod != null">payment_method = #{paymentMethod},</if>
+        <if test="paymentTransactionId != null">payment_transaction_id = #{paymentTransactionId},</if>
+        <if test="paymentDate != null">payment_date = #{paymentDate},</if>
+        <if test="notes != null">notes = #{notes},</if>
+        last_updated_by = #{lastUpdatedBy},
+        last_update_date = SYSDATE
+        WHERE
+        order_id = #{orderId}
+    </update>
+
+    <!-- Update order status -->
+    <update id="updateOrderStatus" parameterType="map">
+        UPDATE orders
+        SET
+        status = #{newStatus},
+        <if test="paymentStatus != null">payment_status = #{paymentStatus},</if>
+        <if test="shippingStatus != null">shipping_status = #{shippingStatus},</if>
+        last_updated_by = #{updatedBy},
+        last_update_date = SYSDATE
+        WHERE
+        order_id = #{orderId}
+    </update>
+
+    <!-- Record order history -->
+    <insert id="insertOrderHistory" parameterType="map">
+        <selectKey keyProperty="historyId" resultType="string" order="BEFORE">
+            SELECT order_history_seq.NEXTVAL AS historyId FROM DUAL
+        </selectKey>
+        INSERT INTO order_history (
+        history_id,
+        order_id,
+        action_date,
+        action_type,
+        previous_status,
+        new_status,
+        comments,
+        performed_by,
+        ip_address
+        ) VALUES (
+        #{historyId},
+        #{orderId},
+        SYSDATE,
+        #{actionType},
+        #{previousStatus, jdbcType=VARCHAR},
+        #{newStatus},
+        #{comments, jdbcType=VARCHAR},
+        #{performedBy},
+        #{ipAddress, jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <!-- Delete order (soft delete) -->
+    <update id="deleteOrder" parameterType="map">
+        UPDATE orders
+        SET
+            status = 'DELETED',
+            last_updated_by = #{updatedBy},
+            last_update_date = SYSDATE
+        WHERE
+            order_id = #{orderId}
+    </update>
+
+    <!-- Cancel order -->
+    <update id="cancelOrder" parameterType="map">
+        UPDATE orders
+        SET
+            status = 'CANCELLED',
+            last_updated_by = #{updatedBy},
+            last_update_date = SYSDATE,
+            cancellation_reason = #{reason, jdbcType=VARCHAR},
+            cancellation_date = SYSDATE
+        WHERE
+            order_id = #{orderId}
+          AND status NOT IN ('COMPLETED', 'CANCELLED', 'DELETED')
+    </update>
+
+    <!-- Update order payment information -->
+    <update id="updateOrderPayment" parameterType="map">
+        UPDATE orders
+        SET
+            payment_status = #{paymentStatus},
+            payment_method = #{paymentMethod},
+            payment_transaction_id = #{transactionId},
+            payment_date = #{paymentDate, jdbcType=TIMESTAMP},
+            last_updated_by = #{updatedBy},
+            last_update_date = SYSDATE
+        WHERE
+            order_id = #{orderId}
+    </update>
+
+    <!-- Update order shipping information -->
+    <update id="updateOrderShipping" parameterType="map">
+        UPDATE orders
+        SET
+            shipping_status = #{shippingStatus},
+            shipping_method = #{shippingMethod},
+            tracking_number = #{trackingNumber},
+            shipping_date = #{shippingDate, jdbcType=TIMESTAMP},
+            carrier = #{carrier, jdbcType=VARCHAR},
+            estimated_delivery_date = #{estimatedDeliveryDate, jdbcType=TIMESTAMP},
+            last_updated_by = #{updatedBy},
+            last_update_date = SYSDATE
+        WHERE
+            order_id = #{orderId}
+    </update>
+
+    <!-- Update order notes -->
+    <update id="updateOrderNotes" parameterType="map">
+        UPDATE orders
+        SET
+            notes = #{notes},
+            last_updated_by = #{updatedBy},
+            last_update_date = SYSDATE
+        WHERE
+            order_id = #{orderId}
+    </update>
+
+    <!-- Delete order item -->
+    <delete id="deleteOrderItem" parameterType="map">
+        DELETE FROM order_items
+        WHERE order_id = #{orderId}
+          AND order_item_id = #{orderItemId}
+    </delete>
+
+    <!-- Clear all order items -->
+    <delete id="clearOrderItems" parameterType="string">
+        DELETE FROM order_items
+        WHERE order_id = #{orderId}
+    </delete>
+
+    <!-- Generate monthly sales report -->
+    <select id="generateMonthlySalesReport" parameterType="map" resultType="map">
+        SELECT
+            TO_CHAR(o.order_date, 'YYYY-MM-DD') AS orderDate,
+            COUNT(DISTINCT o.order_id) AS orderCount,
+            SUM(o.total_amount) AS totalSales,
+            SUM(o.discount_amount) AS totalDiscounts,
+            SUM(o.tax_amount) AS totalTaxes,
+            SUM(o.net_amount) AS netSales,
+            COUNT(DISTINCT o.customer_id) AS customerCount
+        FROM
+            orders o
+        WHERE
+            o.status != 'CANCELLED'
+            AND o.status != 'DELETED'
+            AND TO_CHAR(o.order_date, 'YYYY-MM') = #{yearMonth}
+        GROUP BY
+            TO_CHAR(o.order_date, 'YYYY-MM-DD')
+        ORDER BY
+            orderDate
+    </select>
+
+    <!-- Generate product sales report -->
+    <select id="generateProductSalesReport" parameterType="map" resultType="map">
+        SELECT
+        p.product_id AS productId,
+        p.product_name AS productName,
+        p.product_code AS productCode,
+        COUNT(DISTINCT oi.order_id) AS orderCount,
+        SUM(oi.quantity) AS totalQuantity,
+        SUM(oi.line_total) AS totalSales,
+        AVG(oi.unit_price) AS averagePrice,
+        MAX(oi.unit_price) AS maxPrice,
+        MIN(oi.unit_price) AS minPrice
+        FROM
+        products p
+        JOIN
+        order_items oi ON p.product_id = oi.product_id
+        JOIN
+        orders o ON oi.order_id = o.order_id
+        WHERE
+        o.status != 'CANCELLED'
+        AND o.status != 'DELETED'
+        <if test="fromDate != null">
+            AND o.order_date >= #{fromDate}
+        </if>
+        <if test="toDate != null">
+            AND o.order_date &lt;= #{toDate}
+        </if>
+        <if test="categoryId != null and categoryId != ''">
+            AND EXISTS (
+            SELECT 1 FROM product_categories pc
+            WHERE pc.product_id = p.product_id
+            AND pc.category_id = #{categoryId}
+            )
+        </if>
+        GROUP BY
+        p.product_id, p.product_name, p.product_code
+        ORDER BY
+        totalSales DESC
+    </select>
+
+    <!-- Generate customer orders report -->
+    <select id="generateCustomerOrdersReport" parameterType="map" resultType="map">
+        SELECT
+        c.customer_id AS customerId,
+        c.customer_name AS customerName,
+        c.customer_type AS customerType,
+        c.email AS email,
+        c.phone AS phone,
+        COUNT(o.order_id) AS orderCount,
+        SUM(o.total_amount) AS totalSpent,
+        AVG(o.total_amount) AS averageOrderValue,
+        MAX(o.total_amount) AS largestOrder,
+        MIN(o.order_date) AS firstOrderDate,
+        MAX(o.order_date) AS lastOrderDate
+        FROM
+        customers c
+        JOIN
+        orders o ON c.customer_id = o.customer_id
+        WHERE
+        o.status != 'CANCELLED'
+        AND o.status != 'DELETED'
+        <if test="fromDate != null">
+            AND o.order_date >= #{fromDate}
+        </if>
+        <if test="toDate != null">
+            AND o.order_date &lt;= #{toDate}
+        </if>
+        <if test="customerType != null and customerType != '' and customerType != 'ALL'">
+            AND c.customer_type = #{customerType}
+        </if>
+        GROUP BY
+        c.customer_id, c.customer_name, c.customer_type, c.email, c.phone
+        ORDER BY
+        totalSpent DESC
+    </select>
+
+    <!-- Get order statistics by status -->
+    <select id="getOrderStatsByStatus" parameterType="map" resultType="map">
+        SELECT
+        o.status,
+        COUNT(*) AS orderCount,
+        SUM(o.total_amount) AS totalAmount,
+        AVG(o.total_amount) AS averageAmount
+        FROM
+        orders o
+        WHERE
+        1=1
+        <if test="fromDate != null">
+            AND o.order_date >= #{fromDate}
+        </if>
+        <if test="toDate != null">
+            AND o.order_date &lt;= #{toDate}
+        </if>
+        GROUP BY
+        o.status
+        ORDER BY
+        orderCount DESC
+    </select>
+
+    <!-- Get orders with payment discrepancies -->
+    <select id="getPaymentDiscrepancies" parameterType="map" resultType="map">
+        SELECT
+        o.order_id AS orderId,
+        o.order_no AS orderNo,
+        o.customer_id AS customerId,
+        c.customer_name AS customerName,
+        o.order_date AS orderDate,
+        o.total_amount AS totalAmount,
+        p.payment_amount AS paymentAmount,
+        (o.total_amount - p.payment_amount) AS discrepancy,
+        o.status,
+        o.payment_status AS paymentStatus
+        FROM
+        orders o
+        JOIN
+        customers c ON o.customer_id = c.customer_id
+        LEFT JOIN (
+        SELECT
+        payment_reference_id,
+        SUM(amount) AS payment_amount
+        FROM
+        payments
+        WHERE
+        payment_status = 'COMPLETED'
+        AND payment_type = 'ORDER'
+        GROUP BY
+        payment_reference_id
+        ) p ON o.order_id = p.payment_reference_id
+        WHERE
+        o.status NOT IN ('CANCELLED', 'DELETED')
+        AND (
+        (p.payment_amount IS NULL AND o.payment_status = 'PAID')
+        OR (p.payment_amount IS NOT NULL AND o.payment_status = 'UNPAID')
+        OR (p.payment_amount IS NOT NULL AND o.total_amount != p.payment_amount)
+        )
+        <if test="fromDate != null">
+            AND o.order_date >= #{fromDate}
+        </if>
+        <if test="toDate != null">
+            AND o.order_date &lt;= #{toDate}
+        </if>
+        ORDER BY
+        ABS(o.total_amount - NVL(p.payment_amount, 0)) DESC
+    </select>
+
+    <!-- Find frequent customers -->
+    <select id="findFrequentCustomers" parameterType="map" resultType="map">
+        SELECT
+            c.customer_id AS customerId,
+            c.customer_name AS customerName,
+            c.email AS email,
+            c.phone AS phone,
+            COUNT(o.order_id) AS orderCount,
+            SUM(o.total_amount) AS totalSpent,
+            MAX(o.order_date) AS lastOrderDate,
+            ROUND((SYSDATE - MAX(o.order_date)) * 24) AS hoursSinceLastOrder
+        FROM
+            customers c
+                JOIN
+            orders o ON c.customer_id = o.customer_id
+        WHERE
+            o.status != 'CANCELLED'
+            AND o.status != 'DELETED'
+            AND o.order_date >= ADD_MONTHS(SYSDATE, -#{monthsLookback})
+        GROUP BY
+            c.customer_id, c.customer_name, c.email, c.phone
+        HAVING
+            COUNT(o.order_id) >= #{minOrderCount}
+        ORDER BY
+            orderCount DESC,
+            totalSpent DESC
+    </select>
+
+    <!-- Find abandoned carts -->
+    <select id="findAbandonedCarts" parameterType="map" resultType="map">
+        SELECT
+        c.cart_id AS cartId,
+        c.customer_id AS customerId,
+        cu.customer_name AS customerName,
+        cu.email AS email,
+        c.creation_date AS creationDate,
+        ROUND((SYSDATE - c.last_update_date) * 24) AS hoursAbandonedFor,
+        COUNT(ci.cart_item_id) AS itemCount,
+        SUM(ci.quantity * p.price) AS cartValue
+        FROM
+        shopping_carts c
+        JOIN
+        customers cu ON c.customer_id = cu.customer_id
+        JOIN
+        shopping_cart_items ci ON c.cart_id = ci.cart_id
+        JOIN
+        products p ON ci.product_id = p.product_id
+        WHERE
+        c.status = 'ACTIVE'
+        AND c.is_converted_to_order = 'N'
+        AND c.last_update_date < SYSDATE - (#{minHoursAbandoned} / 24)
+        <if test="maxHoursAbandoned != null">
+            AND c.last_update_date > SYSDATE - (#{maxHoursAbandoned} / 24)
+        </if>
+        GROUP BY
+        c.cart_id, c.customer_id, cu.customer_name, cu.email, c.creation_date, c.last_update_date
+        HAVING
+        COUNT(ci.cart_item_id) > 0
+        ORDER BY
+        hoursAbandonedFor DESC
+    </select>
+
+    <!-- Get shipping notifications to send -->
+    <select id="getShippingNotifications" resultType="map">
+        SELECT
+        o.order_id AS orderId,
+        o.order_no AS orderNo,
+        o.customer_id AS customerId,
+        c.customer_name AS customerName,
+        c.email AS email,
+        o.tracking_number AS trackingNumber,
+        o.carrier AS carrier,
+        o.shipping_date AS shippingDate,
+        o.estimated_delivery_date AS estimatedDeliveryDate,
+        o.shipping_address AS shippingAddress,
+        COUNT(oi.order_item_id) AS itemCount
+        FROM
+        orders o
+        JOIN
+        customers c ON o.customer_id = c.customer_id
+        JOIN
+        order_items oi ON o.order_id = oi.order_id
+        WHERE
+        o.shipping_status = 'SHIPPED'
+        AND o.status NOT IN ('CANCELLED', 'DELETED')
+        AND o.tracking_number IS NOT NULL
+        AND o.shipping_notification_sent = 'N'
+        AND o.shipping_date IS NOT NULL
+        AND o.shipping_date <= SYSDATE
+        GROUP BY
+        o.order_id, o.order_no, o.customer_id, c.customer_name, c.email,
+        o.tracking_number, o.carrier, o.shipping_date, o.estimated_delivery_date, o.shipping_address
+        ORDER BY
+        o.shipping_date
+    </select>
+</mapper>

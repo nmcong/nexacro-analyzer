@@ -31,17 +31,16 @@ const ScreenAnalyzer = (function () {
                 screen.popupCalls.forEach(popup => {
                     // Chuyển đổi popupUrl thành screenId
                     const targetScreenId = getScreenIdFromUrl(popup.popupUrl);
-
-                    if (targetScreenId && screenMap[targetScreenId]) {
+                    if (targetScreenId) {
                         // Thêm vào danh sách con
-                        screenMap[screen.id].childScreens.push({
+                        screenMap[screen.id] && screenMap[screen.id].childScreens && screenMap[screen.id].childScreens.push({
                             id: targetScreenId,
                             popupId: popup.popupId,
                             popupUrl: popup.popupUrl
                         });
 
                         // Thêm vào danh sách màn hình cha
-                        screenMap[targetScreenId].parentScreens.push({
+                        screenMap[targetScreenId] && screenMap[targetScreenId].parentScreens && screenMap[targetScreenId].parentScreens.push({
                             id: screen.id,
                             popupId: popup.popupId
                         });

@@ -54,9 +54,13 @@ const CacheManager = (function () {
                     path: screen.path,
                     size: screen.size,
                     lastModified: screen.lastModified,
-                    popupCalls: screen.popupCalls
+                    popupCalls: screen.popupCalls,
+                    serviceCalls: screen.serviceCalls,
                 })),
-                formFiles: data.formFiles
+                formFiles: data.formFiles,
+                serviceMappings: data.serviceMappings,
+                queryDefinitions: data.queryDefinitions,
+                beanMethods: data.beanMethods
             };
 
             // Lưu dữ liệu dự án

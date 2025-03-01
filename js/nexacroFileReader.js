@@ -178,11 +178,12 @@ const NexacroFileReader = (function () {
      * @param {string} content - Nội dung file
      * @returns {Object|null} - Thông tin màn hình
      */
-    // Add to fileReader.js
     function parseScreenFile(file, content) {
         const fileName = file.name;
         const filePath = file.webkitRelativePath || fileName;
-
+        // if(fileName !== 'main.xfdl') {
+        //     return null;
+        // }
         // Check if this is a screen file
         if (!fileName.endsWith('.xfdl') && !fileName.endsWith('.xfdl.js')) {
             return null;
@@ -210,85 +211,6 @@ const NexacroFileReader = (function () {
     }
 
     /**
-     * Find service calls in file content
-     * @param {string} content - File content
-     * @returns {Array} - List of service calls
-     */
-    function findServiceCalls(content) {
-        const serviceCalls = [];
-
-        // Find direct gfnCallService calls
-        const directCallRegex = /this\.gfnCallService\s*\(\s*["']([^"']+)["']\s*\)/g;
-        let directMatch;
-        while ((directMatch = directCallRegex.exec(content)) !== null) {
-            serviceCalls.push({
-                tranId: directMatch[1],
-                type: 'direct',
-                location: directMatch.index
-            });
-        }
-
-        // Find service definitions - dataset with service info
-        // Look for patterns like: this.dsService.addRow(); this.dsService.setColumn(0, "tranId", "serviceId");
-        const serviceDefRegex = /this\.(ds[A-Za-z0-9_]+)\.setColumn\s*\([^,]+,\s*["']tranId["'],\s*["']([^"']+)["']\s*\)/g;
-
-        let serviceDatasets = new Map();
-        let defMatch;
-
-        while ((defMatch = serviceDefRegex.exec(content)) !== null) {
-            const dsName = defMatch[1];
-            const tranId = defMatch[2];
-
-            if (!serviceDatasets.has(dsName)) {
-                serviceDatasets.set(dsName, []);
-            }
-
-            // Look for other columns in this service definition
-            const svcIdRegex = new RegExp(`this\\.${dsName}\\.setColumn\\s*\\([^,]+,\\s*["']svcId["'],\\s*["']([^"']+)["']\\s*\\)`, 'g');
-            const inDsRegex = new RegExp(`this\\.${dsName}\\.setColumn\\s*\\([^,]+,\\s*["']inDss["'],\\s*["']([^"']+)["']\\s*\\)`, 'g');
-            const outDsRegex = new RegExp(`this\\.${dsName}\\.setColumn\\s*\\([^,]+,\\s*["']outDs["'],\\s*["']([^"']+)["']\\s*\\)`, 'g');
-            const argvRegex = new RegExp(`this\\.${dsName}\\.setColumn\\s*\\([^,]+,\\s*["']argvs["'],\\s*["']([^"']+)["']\\s*\\)`, 'g');
-            const callbackRegex = new RegExp(`this\\.${dsName}\\.setColumn\\s*\\([^,]+,\\s*["']cback["'],\\s*["']([^"']+)["']\\s*\\)`, 'g');
-            const asyncRegex = new RegExp(`this\\.${dsName}\\.setColumn\\s*\\([^,]+,\\s*["']async["'],\\s*["']([^"']+)["']\\s*\\)`, 'g');
-
-            // Reset lastIndex for each regex
-            svcIdRegex.lastIndex = 0;
-            inDsRegex.lastIndex = 0;
-            outDsRegex.lastIndex = 0;
-            argvRegex.lastIndex = 0;
-            callbackRegex.lastIndex = 0;
-            asyncRegex.lastIndex = 0;
-
-            // Get service details
-            const svcIdMatch = svcIdRegex.exec(content);
-            const inDsMatch = inDsRegex.exec(content);
-            const outDsMatch = outDsRegex.exec(content);
-            const argvMatch = argvRegex.exec(content);
-            const callbackMatch = callbackRegex.exec(content);
-            const asyncMatch = asyncRegex.exec(content);
-
-            serviceDatasets.get(dsName).push({
-                tranId: tranId,
-                svcId: svcIdMatch ? svcIdMatch[1] : '',
-                inDss: inDsMatch ? inDsMatch[1] : '',
-                outDs: outDsMatch ? outDsMatch[1] : '',
-                argvs: argvMatch ? argvMatch[1] : '',
-                callback: callbackMatch ? callbackMatch[1] : '',
-                async: asyncMatch ? asyncMatch[1] === 'true' : true,
-                location: defMatch.index,
-                type: 'defined'
-            });
-        }
-
-        // Add defined services to service calls
-        for (const [dsName, services] of serviceDatasets.entries()) {
-            serviceCalls.push(...services);
-        }
-
-        return serviceCalls;
-    }
-
-    /**
      * Tìm các cuộc gọi hàm gfnOpenPopup trong nội dung file
      * @param {string} content - Nội dung file
      * @returns {Array} - Danh sách các cuộc gọi popup
@@ -309,6 +231,118 @@ const NexacroFileReader = (function () {
         }
 
         return popupCalls;
+    }
+
+    /**
+     * Find service calls in file content
+     * @param {string} content - File content
+     * @returns {Array} - List of service calls
+     */
+    /**
+     * Tìm các cuộc gọi service trong nội dung file
+     * @param {string} content - Nội dung file
+     * @returns {Array} - Danh sách các cuộc gọi service
+     */
+    function findServiceCalls(content) {
+
+        // Find service definitions - dataset with service info using setColumn
+        // Look for patterns like: this.dsService.addRow(); this.dsService.setColumn(0, "tranId", "serviceId");
+        const serviceDefRegex = /this\.(ds[A-Za-z0-9_]+)\.setColumn\s*\([^,]+,\s*["']tranId["'],\s*["']([^"']+)["']\s*\)/g;
+
+        let serviceDatasets = new Map();
+        let defMatch;
+
+        while ((defMatch = serviceDefRegex.exec(content)) !== null) {
+            const dsName = defMatch[1];
+            const tranId = defMatch[2];
+
+            // Look for other columns in this service definition
+            const svcIdRegex = new RegExp(`this\\.${dsName}\\.setColumn\\s*\\([^,]+,\\s*["']svcId["'],\\s*["']([^"']+)["']\\s*\\)`, 'g');
+            const inDsRegex = new RegExp(`this\\.${dsName}\\.setColumn\\s*\\([^,]+,\\s*["']inDss["'],\\s*["']([^"']+)["']\\s*\\)`, 'g');
+            const outDsRegex = new RegExp(`this\\.${dsName}\\.setColumn\\s*\\([^,]+,\\s*["']outDs["'],\\s*["']([^"']+)["']\\s*\\)`, 'g');
+            const argvRegex = new RegExp(`this\\.${dsName}\\.setColumn\\s*\\([^,]+,\\s*["']argvs["'],\\s*(.*?)\\)\\s*;`, 'g');
+            const callbackRegex = new RegExp(`this\\.${dsName}\\.setColumn\\s*\\([^,]+,\\s*["']cback["'],\\s*["']([^"']+)["']\\s*\\)`, 'g');
+            const asyncRegex = new RegExp(`this\\.${dsName}\\.setColumn\\s*\\([^,]+,\\s*["']async["'],\\s*["']([^"']+)["']\\s*\\)`, 'g');
+
+            // Reset lastIndex for each regex
+            svcIdRegex.lastIndex = 0;
+            inDsRegex.lastIndex = 0;
+            outDsRegex.lastIndex = 0;
+            argvRegex.lastIndex = 0;
+            callbackRegex.lastIndex = 0;
+            asyncRegex.lastIndex = 0;
+
+            // Get service details
+            const svcIdMatch = svcIdRegex.exec(content);
+            const inDsMatch = inDsRegex.exec(content);
+            const outDsMatch = outDsRegex.exec(content);
+            const argvMatch = argvRegex.exec(content);
+            const callbackMatch = callbackRegex.exec(content);
+            const asyncMatch = asyncRegex.exec(content);
+
+            serviceDatasets[tranId] = {
+                tranId: tranId,
+                svcId: svcIdMatch ? svcIdMatch[1] : '',
+                inDss: inDsMatch ? inDsMatch[1] : '',
+                outDs: outDsMatch ? outDsMatch[1] : '',
+                argvs: argvMatch ? argvMatch[1] : '',
+                callback: callbackMatch ? callbackMatch[1] : '',
+                async: asyncMatch ? asyncMatch[1] === 'true' : true,
+                location: defMatch.index,
+                type: 'defined'
+            };
+        }
+
+        // Find service definitions using XML-like syntax (<Row><Column>)
+        // Look for patterns like: <Row><Col id="tranId">search_users</Col><Col id="svcId">userService.searchUsers</Col>...</Row>
+        const xmlServiceRegex = /<Row>\s*(?:<Col\s+id="([^"]+)"[^>]*>([^<]*)<\/Col>\s*)+<\/Row>/g;
+        let xmlRowMatch;
+
+        while ((xmlRowMatch = xmlServiceRegex.exec(content)) !== null) {
+            const rowContent = xmlRowMatch[0];
+
+            // Extract service ID columns from the row
+            const tranIdMatch = /<Col\s+id="tranId"[^>]*>([^<]+)<\/Col>/i.exec(rowContent);
+            if (!tranIdMatch) continue; // Skip if no tranId found
+
+            const tranId = tranIdMatch[1].trim();
+
+            // Extract other service properties
+            const svcIdMatch = /<Col\s+id="svcId"[^>]*>([^<]+)<\/Col>/i.exec(rowContent);
+            const inDssMatch = /<Col\s+id="inDss"[^>]*>([^<]+)<\/Col>/i.exec(rowContent);
+            const outDsMatch = /<Col\s+id="outDs"[^>]*>([^<]+)<\/Col>/i.exec(rowContent);
+            const argvsMatch = /<Col\s+id="argvs"[^>]*>([^<]+)<\/Col>/i.exec(rowContent);
+            const callbackMatch = /<Col\s+id="cback"[^>]*>([^<]+)<\/Col>/i.exec(rowContent);
+            const asyncMatch = /<Col\s+id="async"[^>]*>([^<]+)<\/Col>/i.exec(rowContent);
+
+            serviceDatasets[tranId] = {
+                tranId: tranId,
+                svcId: svcIdMatch ? svcIdMatch[1].trim() : '',
+                inDss: inDssMatch ? inDssMatch[1].trim() : '',
+                outDs: outDsMatch ? outDsMatch[1].trim() : '',
+                argvs: argvsMatch ? argvsMatch[1].trim() : '',
+                callback: callbackMatch ? callbackMatch[1].trim() : '',
+                async: asyncMatch ? asyncMatch[1].trim() === 'true' : true,
+                location: xmlRowMatch.index,
+                type: 'xml-defined'
+            }
+        }
+        const serviceCalls = [];
+
+        // Find direct gfnCallService calls
+        const directCallRegex = /this\.gfnCallService\s*\(\s*["']([^"']+)["']\s*\)/g;
+        let directMatch;
+        while ((directMatch = directCallRegex.exec(content)) !== null) {
+            let tranId = directMatch[1];
+            serviceCalls.push({
+                ...serviceDatasets[tranId],
+                tranId,
+                type: 'direct',
+                location: directMatch.index,
+            });
+        }
+
+        return serviceCalls;
     }
 
     return {

@@ -1,0 +1,164 @@
+<XFDL version="2.0">
+  <Form id="MainDashboard" width="1280" height="720" titletext="System Dashboard">
+    <Layouts>
+      <Layout>
+        <Div id="divHeader" left="0" top="0" width="100%" height="50" background="#4a6baf">
+          <Components>
+            <Static id="stcTitle" left="20" top="10" width="300" height="30" text="Company ERP System" color="white" font="bold 16px Arial"/>
+            <Button id="btnLogout" right="20" top="10" width="100" height="30" text="Logout"/>
+          </Components>
+        </Div>
+        <Div id="divContent" left="0" top="50" width="100%" height="670">
+          <Components>
+            <Static id="stcWelcome" left="30" top="20" width="500" height="40" text="Welcome, Admin" font="bold 18px Arial"/>
+            <Static id="stcDate" right="30" top="20" width="200" height="30" text="2023-05-15" textAlign="right"/>
+
+            <Div id="divSales" left="30" top="80" width="500" height="250" background="#f0f5ff" border="1px solid #ccc">
+              <Components>
+                <Static id="stcSalesTitle" left="20" top="20" width="200" height="30" text="Sales Overview" font="bold 14px Arial"/>
+                <Button id="btnSalesDetail" right="20" top="20" width="100" height="30" text="View Details"/>
+              </Components>
+            </Div>
+
+            <Div id="divInventory" left="550" top="80" width="500" height="250" background="#f0fff0" border="1px solid #ccc">
+              <Components>
+                <Static id="stcInventoryTitle" left="20" top="20" width="200" height="30" text="Inventory Status" font="bold 14px Arial"/>
+                <Button id="btnInventoryDetail" right="20" top="20" width="100" height="30" text="View Details"/>
+              </Components>
+            </Div>
+
+            <Div id="divCustomers" left="30" top="350" width="500" height="250" background="#fff0f5" border="1px solid #ccc">
+              <Components>
+                <Static id="stcCustomersTitle" left="20" top="20" width="200" height="30" text="Customer Analytics" font="bold 14px Arial"/>
+                <Button id="btnCustomerDetail" right="20" top="20" width="120" height="30" text="View Customers"/>
+              </Components>
+            </Div>
+
+            <Div id="divOrders" left="550" top="350" width="500" height="250" background="#fff5e6" border="1px solid #ccc">
+              <Components>
+                <Static id="stcOrdersTitle" left="20" top="20" width="200" height="30" text="Recent Orders" font="bold 14px Arial"/>
+                <Button id="btnOrderDetail" right="20" top="20" width="100" height="30" text="View Orders"/>
+              </Components>
+            </Div>
+          </Components>
+        </Div>
+      </Layout>
+    </Layouts>
+
+    <Script>
+      // Form initialization
+      this.MainDashboard_onload = function() {
+        // Initialize service datasets
+        this.fn_initService();
+
+        // Load dashboard data
+        this.fn_loadDashboardData();
+
+        // Set user info
+        this.fn_setUserInfo();
+      };
+
+      // Initialize service datasets
+      this.fn_initService = function() {
+        // Create dashboard service dataset
+        this.dsDashboardService = new Dataset("dsDashboardService");
+        this.dsDashboardService.addColumn("tranId", "string");
+        this.dsDashboardService.addColumn("svcId", "string");
+        this.dsDashboardService.addColumn("inDss", "string");
+        this.dsDashboardService.addColumn("outDs", "string");
+        this.dsDashboardService.addColumn("argvs", "string");
+        this.dsDashboardService.addColumn("cback", "string");
+        this.dsDashboardService.addColumn("async", "boolean");
+
+        // Dashboard summary service
+        this.dsDashboardService.addRow();
+        this.dsDashboardService.setColumn(0, "tranId", "dashboard_summary");
+        this.dsDashboardService.setColumn(0, "svcId", "dashboardService.getSummary");
+        this.dsDashboardService.setColumn(0, "inDss", "");
+        this.dsDashboardService.setColumn(0, "outDs", "dsSalesSummary=sales dsInventorySummary=inventory dsCustomerSummary=customers dsOrderSummary=orders");
+        this.dsDashboardService.setColumn(0, "argvs", "period=month userId=" + this.gfnGetUserId());
+        this.dsDashboardService.setColumn(0, "cback", "fn_dashboardCallback");
+        this.dsDashboardService.setColumn(0, "async", true);
+
+        // User notifications service
+        this.dsDashboardService.addRow();
+        this.dsDashboardService.setColumn(1, "tranId", "user_notifications");
+        this.dsDashboardService.setColumn(1, "svcId", "notificationService.getUserNotifications");
+        this.dsDashboardService.setColumn(1, "inDss", "");
+        this.dsDashboardService.setColumn(1, "outDs", "dsNotifications=notifications");
+        this.dsDashboardService.setColumn(1, "argvs", "userId=" + this.gfnGetUserId());
+        this.dsDashboardService.setColumn(1, "cback", "fn_notificationCallback");
+        this.dsDashboardService.setColumn(1, "async", true);
+      };
+
+      // Load dashboard data
+      this.fn_loadDashboardData = function() {
+        // Call dashboard summary service
+        this.gfnCallService("dashboard_summary");
+
+        // Call notifications service
+        this.gfnCallService("user_notifications");
+      };
+
+      // Sales detail button click
+      this.divSales_btnSalesDetail_onclick = function(obj, e) {
+        this.gfnOpenPopup("salesReportPopup", "report::SalesSummary.xfdl", {reportType: "sales", period: "month"}, "fn_salesReportCallback");
+      };
+
+      // Inventory detail button click
+      this.divInventory_btnInventoryDetail_onclick = function(obj, e) {
+        this.gfnOpenPopup("inventoryPopup", "product::ProductInventory.xfdl", {}, "fn_inventoryCallback");
+      };
+
+      // Customer detail button click
+      this.divCustomers_btnCustomerDetail_onclick = function(obj, e) {
+        this.gfnOpenPopup("customerListPopup", "customer::CustomerList.xfdl", {viewMode: "analytics"}, "fn_customerCallback");
+      };
+
+      // Order detail button click
+      this.divOrders_btnOrderDetail_onclick = function(obj, e) {
+        this.gfnOpenPopup("orderListPopup", "order::OrderList.xfdl", {filter: "recent"}, "fn_orderCallback");
+      };
+
+      // Logout button click
+      this.divHeader_btnLogout_onclick = function(obj, e) {
+        if (confirm("Are you sure you want to logout?")) {
+          // Perform logout process
+          this.gfnOpenPopup("loginPopup", "common::Login.xfdl", {}, "fn_loginCallback", "modal=true,width=400,height=300");
+        }
+      };
+
+      // Dashboard service callback
+      this.fn_dashboardCallback = function(trId, errorCode, errorMsg) {
+        if (errorCode != 0) {
+          this.gfnOpenPopup("msgPopup", "common::MessagePopup.xfdl", {message: "Failed to load dashboard data: " + errorMsg, type: "error"}, "fn_msgCallback");
+          return;
+        }
+
+        // Process dashboard data
+        this.fn_processDashboardData();
+      };
+
+      // Notification service callback
+      this.fn_notificationCallback = function(trId, errorCode, errorMsg) {
+        if (errorCode != 0) {
+          // Handle error silently
+          return;
+        }
+
+        // Process notifications
+        this.fn_processNotifications();
+      };
+
+      // Process dashboard data
+      this.fn_processDashboardData = function() {
+        // Implementation code here...
+      };
+
+      // Process notifications
+      this.fn_processNotifications = function() {
+        // Implementation code here...
+      };
+    </Script>
+  </Form>
+</XFDL>

@@ -20,7 +20,15 @@
 <body>
 <div class="app-container">
     <header>
-        <h1>Nexacro Screen Analyzer</h1>
+        <div class="header-main">
+            <h1>Nexacro Screen Analyzer</h1>
+            <div class="header-actions">
+                <span id="cacheStatus">Bộ nhớ đệm: Không có dữ liệu</span>
+                <button class="secondary-button" id="clearCacheBtn">Xóa bộ nhớ đệm</button>
+                <button class="secondary-button export-btn" id="exportDataBtn">Xuất dữ liệu</button>
+                <button class="secondary-button import-btn" id="importDataBtn">Nhập dữ liệu</button>
+            </div>
+        </div>
     </header>
 
     <div class="project-loader">
@@ -83,15 +91,6 @@
             </div>
         </div>
     </div>
-
-    <footer>
-        <div class="cache-info">
-            <span id="cacheStatus">Bộ nhớ đệm: Không có dữ liệu</span>
-            <button class="secondary-button" id="clearCacheBtn">Xóa bộ nhớ đệm</button>
-            <button class="secondary-button export-btn" id="exportDataBtn">Xuất dữ liệu</button>
-            <button class="secondary-button import-btn" id="importDataBtn">Nhập dữ liệu</button>
-        </div>
-    </footer>
 </div>
 
 <script src="js/nexacroFileReader.js"></script>
@@ -104,29 +103,5 @@
 <script src="js/uiManager.js"></script>
 <script src="js/graphRenderer.js"></script>
 <script src="js/app.js"></script>
-<script>
-    // Copy to clipboard function for code blocks
-    function copyToClipboard(button) {
-        const pre = button.nextElementSibling;
-        const code = pre.textContent;
-
-        navigator.clipboard.writeText(code).then(() => {
-            const originalText = button.textContent;
-            button.textContent = 'Copied!';
-            button.style.backgroundColor = '#d1fae5';
-            button.style.borderColor = '#059669';
-            button.style.color = '#059669';
-
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.style.backgroundColor = '';
-                button.style.borderColor = '';
-                button.style.color = '';
-            }, 2000);
-        }).catch(err => {
-            console.error('Could not copy text: ', err);
-        });
-    }
-</script>
 </body>
 </html>

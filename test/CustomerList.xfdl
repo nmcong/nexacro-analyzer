@@ -1,0 +1,286 @@
+<XFDL version="2.0">
+  <Form id="CustomerList" width="800" height="600" titletext="Customer Management" onload="CustomerList_onload">
+    <Layouts>
+      <Layout>
+        <Div id="divHeader" left="0" top="0" width="100%" height="50" background="#4a6baf">
+          <Components>
+            <Static id="stcTitle" left="20" top="10" width="300" height="30" text="Customer Management" color="white" font="bold 16px Arial"/>
+          </Components>
+        </Div>
+        <Div id="divSearch" left="0" top="50" width="100%" height="50" background="#f0f0f0">
+          <Components>
+            <Edit id="edtSearchKeyword" left="20" top="10" width="200" height="30" placeholder="Search customers..."/>
+            <Button id="btnSearch" left="230" top="10" width="80" height="30" text="Search"/>
+            <Button id="btnAdvancedSearch" left="320" top="10" width="120" height="30" text="Advanced Search"/>
+            <Button id="btnAddCustomer" right="20" top="10" width="120" height="30" text="Add Customer"/>
+          </Components>
+        </Div>
+        <Grid id="grdCustomerList" left="20" top="120" right="20" bottom="70" binddataset="dsCustomerList">
+          <Formats>
+            <Format id="default">
+              <Columns>
+                <Column size="80"/>
+                <Column size="120"/>
+                <Column size="120"/>
+                <Column size="200"/>
+                <Column size="100"/>
+                <Column size="100"/>
+              </Columns>
+              <Rows>
+                <Row size="30" band="head"/>
+                <Row size="30"/>
+              </Rows>
+              <Band id="head">
+                <Cell text="ID"/>
+                <Cell col="1" text="Customer Name"/>
+                <Cell col="2" text="Contact Person"/>
+                <Cell col="3" text="Email"/>
+                <Cell col="4" text="Phone"/>
+                <Cell col="5" text="Status"/>
+              </Band>
+              <Band id="body">
+                <Cell text="bind:customerId"/>
+                <Cell col="1" text="bind:customerName"/>
+                <Cell col="2" text="bind:contactName"/>
+                <Cell col="3" text="bind:email"/>
+                <Cell col="4" text="bind:phone"/>
+                <Cell col="5" text="bind:status"/>
+              </Band>
+            </Format>
+          </Formats>
+        </Grid>
+        <Div id="divPaging" left="0" bottom="20" width="100%" height="30">
+          <Components>
+            <Button id="btnFirst" left="300" top="0" width="30" height="30" text="&lt;&lt;"/>
+            <Button id="btnPrev" left="335" top="0" width="30" height="30" text="&lt;"/>
+            <Static id="stcPaging" left="370" top="0" width="100" height="30" text="1 / 10" textAlign="center"/>
+            <Button id="btnNext" left="475" top="0" width="30" height="30" text="&gt;"/>
+            <Button id="btnLast" left="510" top="0" width="30" height="30" text="&gt;&gt;"/>
+          </Components>
+        </Div>
+      </Layout>
+    </Layouts>
+
+    <Objects>
+      <Dataset id="dsCustomerList">
+        <ColumnInfo>
+          <Column id="customerId" type="STRING" size="20"/>
+          <Column id="customerName" type="STRING" size="100"/>
+          <Column id="contactName" type="STRING" size="100"/>
+          <Column id="email" type="STRING" size="100"/>
+          <Column id="phone" type="STRING" size="20"/>
+          <Column id="status" type="STRING" size="20"/>
+        </ColumnInfo>
+      </Dataset>
+
+      <Dataset id="dsSearchParam">
+        <ColumnInfo>
+          <Column id="keyword" type="STRING" size="100"/>
+          <Column id="type" type="STRING" size="20"/>
+          <Column id="status" type="STRING" size="20"/>
+        </ColumnInfo>
+        <Rows>
+          <Row>
+            <Col id="keyword"></Col>
+            <Col id="type">all</Col>
+            <Col id="status">all</Col>
+          </Row>
+        </Rows>
+      </Dataset>
+    </Objects>
+
+    <Script>
+      // Form initialization
+      this.CustomerList_onload = function() {
+        // Initialize service
+        this.fn_initService();
+
+        // Search customers with default parameters
+        this.fn_searchCustomers();
+      };
+
+      // Initialize service
+      this.fn_initService = function() {
+        <Dataset id="dsService">
+          <ColumnInfo>
+            <Column id="tranId" type="STRING" size="256"/>
+            <Column id="svcId" type="STRING" size="256"/>
+            <Column id="inDss" type="STRING" size="256"/>
+            <Column id="outDs" type="STRING" size="256"/>
+            <Column id="argvs" type="STRING" size="512"/>
+            <Column id="cback" type="STRING" size="256"/>
+            <Column id="async" type="BOOLEAN" size="256"/>
+          </ColumnInfo>
+          <Rows>
+            <Row>
+              <Col id="tranId">search_customers</Col>
+              <Col id="svcId">customerService.searchCustomers</Col>
+              <Col id="inDss">dsSearchParam=searchParam</Col>
+              <Col id="outDs">dsCustomerList=customers dsTotalCount=totalCount</Col>
+              <Col id="argvs">pageIndex=1 pageSize=10 sortColumn=customerName sortOrder=asc</Col>
+              <Col id="cback">fn_searchCallback</Col>
+              <Col id="async">true</Col>
+            </Row>
+            <Row>
+              <Col id="tranId">get_customer_detail</Col>
+              <Col id="svcId">customerService.getCustomerDetail</Col>
+              <Col id="inDss"></Col>
+              <Col id="outDs">dsCustomerDetail=customer dsCustomerOrders=orders dsCustomerPayments=payments</Col>
+              <Col id="argvs">customerId=</Col>
+              <Col id="cback">fn_detailCallback</Col>
+              <Col id="async">true</Col>
+            </Row>
+            <Row>
+              <Col id="tranId">delete_customer</Col>
+              <Col id="svcId">customerService.deleteCustomer</Col>
+              <Col id="inDss">dsDeleteParam=deleteParam</Col>
+              <Col id="outDs"></Col>
+              <Col id="argvs">userId=</Col>
+              <Col id="cback">fn_deleteCallback</Col>
+              <Col id="async">false</Col>
+            </Row>
+          </Rows>
+        </Dataset>
+      };
+
+      // Search button click
+      this.divSearch_btnSearch_onclick = function(obj, e) {
+        // Update search parameters
+        this.dsSearchParam.setColumn(0, "keyword", this.divSearch.form.edtSearchKeyword.value);
+
+        // Call search service
+        this.fn_searchCustomers();
+      };
+
+      // Search customers function
+      this.fn_searchCustomers = function() {
+        // Call search service
+        this.gfnCallService("search_customers");
+      };
+
+      // Advanced search button click
+      this.divSearch_btnAdvancedSearch_onclick = function(obj, e) {
+        this.gfnOpenPopup("advancedSearchPopup", "customer::CustomerSearch.xfdl", {}, "fn_advancedSearchCallback", "modal=true,width=600,height=400");
+      };
+
+      // Add customer button click
+      this.divSearch_btnAddCustomer_onclick = function(obj, e) {
+        this.gfnOpenPopup("addCustomerPopup", "customer::CustomerRegistration.xfdl", {mode: "add"}, "fn_addCustomerCallback", "modal=true,width=700,height=500");
+      };
+
+      // Grid double click - View customer details
+      this.grdCustomerList_oncelldblclick = function(obj, e) {
+        const customerId = this.dsCustomerList.getColumn(e.row, "customerId");
+        if (customerId) {
+          this.fn_viewCustomerDetail(customerId);
+        }
+      };
+
+      // View customer detail
+      this.fn_viewCustomerDetail = function(customerId) {
+        // Set customer ID in service arguments
+        this.dsService.setColumn(1, "argvs", "customerId=" + customerId);
+
+        // Get customer details first
+        this.gfnCallService("get_customer_detail");
+      };
+
+      // Search callback
+      this.fn_searchCallback = function(trId, errorCode, errorMsg) {
+        if (errorCode != 0) {
+          this.gfnOpenPopup("msgPopup", "common::MessagePopup.xfdl", {message: "Failed to search customers: " + errorMsg, type: "error"}, "fn_msgCallback");
+          return;
+        }
+
+        // Update paging information
+        this.fn_updatePaging();
+      };
+
+      // Customer detail callback
+      this.fn_detailCallback = function(trId, errorCode, errorMsg) {
+        if (errorCode != 0) {
+          this.gfnOpenPopup("msgPopup", "common::MessagePopup.xfdl", {message: "Failed to get customer details: " + errorMsg, type: "error"}, "fn_msgCallback");
+          return;
+        }
+
+        // Open customer detail popup with loaded data
+        const customerId = this.dsCustomerDetail.getColumn(0, "customerId");
+        this.gfnOpenPopup("customerDetailPopup", "customer::CustomerDetail.xfdl", {customerId: customerId, mode: "view"}, "fn_customerDetailCallback", "modal=true,width=800,height=600");
+      };
+
+      // Advanced search callback
+      this.fn_advancedSearchCallback = function(popupId, rtnVal) {
+        if (rtnVal) {
+          // Apply advanced search parameters
+          this.dsSearchParam.copyData(rtnVal.dsSearchParam);
+
+          // Perform search with new parameters
+          this.fn_searchCustomers();
+        }
+      };
+
+      // Paging navigation
+      this.divPaging_btnFirst_onclick = function(obj, e) {
+        this.fn_goToPage(1);
+      };
+
+      this.divPaging_btnPrev_onclick = function(obj, e) {
+        const currentPage = this.fn_getCurrentPage();
+        if (currentPage > 1) {
+          this.fn_goToPage(currentPage - 1);
+        }
+      };
+
+      this.divPaging_btnNext_onclick = function(obj, e) {
+        const currentPage = this.fn_getCurrentPage();
+        const totalPages = this.fn_getTotalPages();
+        if (currentPage < totalPages) {
+          this.fn_goToPage(currentPage + 1);
+        }
+      };
+
+      this.divPaging_btnLast_onclick = function(obj, e) {
+        const totalPages = this.fn_getTotalPages();
+        this.fn_goToPage(totalPages);
+      };
+
+      // Go to specific page
+      this.fn_goToPage = function(pageIndex) {
+        // Update page index in service arguments
+        const serviceArgvs = this.dsService.getColumn(0, "argvs");
+        const newArgvs = serviceArgvs.replace(/pageIndex=\d+/, "pageIndex=" + pageIndex);
+        this.dsService.setColumn(0, "argvs", newArgvs);
+
+        // Perform search with updated page
+        this.fn_searchCustomers();
+      };
+
+      // Get current page
+      this.fn_getCurrentPage = function() {
+        const pagingText = this.divPaging.form.stcPaging.text;
+        return parseInt(pagingText.split(' / ')[0]);
+      };
+
+      // Get total pages
+      this.fn_getTotalPages = function() {
+        const pagingText = this.divPaging.form.stcPaging.text;
+        return parseInt(pagingText.split(' / ')[1]);
+      };
+
+      // Update paging information
+      this.fn_updatePaging = function() {
+        const totalCount = this.dsTotalCount.getColumn(0, "count");
+        const pageSize = 10; // Should match the pageSize in service arguments
+        const totalPages = Math.ceil(totalCount / pageSize);
+
+        // Get current page from service arguments
+        const serviceArgvs = this.dsService.getColumn(0, "argvs");
+        const pageIndexMatch = serviceArgvs.match(/pageIndex=(\d+)/);
+        const currentPage = pageIndexMatch ? parseInt(pageIndexMatch[1]) : 1;
+
+        // Update paging text
+        this.divPaging.form.stcPaging.set_text(currentPage + " / " + totalPages);
+      };
+    </Script>
+  </Form>
+</XFDL>

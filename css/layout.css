@@ -18,6 +18,14 @@ header {
     box-shadow: var(--shadow);
 }
 
+.header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
 header h1 {
     font-size: 24px;
     font-weight: 600;
@@ -25,12 +33,57 @@ header h1 {
     margin: 0;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#cacheStatus {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 5px 10px;
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+/* Đảm bảo các nút trong header có màu phù hợp với nền tối */
+.header-actions .secondary-button {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: var(--primary-dark);
+    border: none;
+}
+
+.header-actions .secondary-button:hover {
+    background-color: white;
+    transform: translateY(-1px);
+}
+
+.header-actions .export-btn {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+.header-actions .export-btn:hover {
+    background-color: #bbdefb;
+}
+
+.header-actions .import-btn {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.header-actions .import-btn:hover {
+    background-color: #c8e6c9;
+}
+
 .main-content {
     display: flex;
     gap: 20px;
     flex: 1;
     overflow: hidden;
-    height: calc(100vh - 160px);
+    height: calc(100vh - 100px);
 }
 
 .sidebar {
@@ -81,14 +134,6 @@ header h1 {
     height: calc(100% - 40px);
     background-color: #f8f9fa;
     border-radius: var(--border-radius);
-}
-
-footer {
-    padding: 20px;
-    background-color: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    margin-top: 20px;
 }
 
 .cache-info {

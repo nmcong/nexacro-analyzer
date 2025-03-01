@@ -1,0 +1,122 @@
+[
+  {
+    "projectId": "ERP",
+    "moduleId": "Customer",
+    "programId": "CustomerManagement",
+    "pageId": "CustomerList",
+    "serviceId": "customerService.searchCustomers",
+    "queryIds": "selectCustomerList,countCustomers",
+    "beanName": null,
+    "methodName": null
+  },
+  {
+    "projectId": "ERP",
+    "moduleId": "Customer",
+    "programId": "CustomerManagement",
+    "pageId": "CustomerDetail",
+    "serviceId": "customerService.getCustomerDetail",
+    "queryIds": "selectCustomerDetail,selectCustomerContacts,selectCustomerAddresses",
+    "beanName": null,
+    "methodName": null
+  },
+  {
+    "projectId": "ERP",
+    "moduleId": "Product",
+    "programId": "ProductManagement",
+    "pageId": "ProductList",
+    "serviceId": "productService.searchProducts",
+    "queryIds": null,
+    "beanName": "ProductService",
+    "methodName": "searchProducts"
+  },
+  {
+    "projectId": "ERP",
+    "moduleId": "Product",
+    "programId": "ProductManagement",
+    "pageId": "ProductDetail",
+    "serviceId": "productService.getProductDetail",
+    "queryIds": null,
+    "beanName": "ProductService",
+    "methodName": "getProductDetail"
+  },
+  {
+    "projectId": "ERP",
+    "moduleId": "Product",
+    "programId": "ProductManagement",
+    "pageId": "ProductInventory",
+    "serviceId": "productService.getProductInventory",
+    "queryIds": null,
+    "beanName": "ProductService",
+    "methodName": "getProductInventory"
+  },
+  {
+    "projectId": "ERP",
+    "moduleId": "Product",
+    "programId": "ProductManagement",
+    "pageId": "ProductDetail",
+    "serviceId": "productService.saveProduct",
+    "queryIds": null,
+    "beanName": "ProductService",
+    "methodName": "saveProduct"
+  },
+  {
+    "projectId": "ERP",
+    "moduleId": "Order",
+    "programId": "OrderManagement",
+    "pageId": "OrderList",
+    "serviceId": "orderService.searchOrders",
+    "queryIds": "selectOrderList,countOrders",
+    "beanName": null,
+    "methodName": null
+  },
+  {
+    "projectId": "ERP",
+    "moduleId": "Order",
+    "programId": "OrderManagement",
+    "pageId": "OrderDetail",
+    "serviceId": "orderService.getOrderDetail",
+    "queryIds": "selectOrderDetail,selectOrderItems,selectOrderHistory,selectOrderDocuments",
+    "beanName": null,
+    "methodName": null
+  },
+  {
+    "projectId": "ERP",
+    "moduleId": "Order",
+    "programId": "OrderManagement",
+    "pageId": "OrderDetail",
+    "serviceId": "orderService.changeOrderStatus",
+    "queryIds": "updateOrderStatus,insertOrderHistory",
+    "beanName": null,
+    "methodName": null
+  },
+  {
+    "projectId": "ERP",
+    "moduleId": "Dashboard",
+    "programId": "MainDashboard",
+    "pageId": "Dashboard",
+    "serviceId": "dashboardService.getSummary",
+    "queryIds": "selectSalesSummary,selectInventorySummary,selectCustomerSummary,selectOrderSummary",
+    "beanName": null,
+    "methodName": null
+  },
+  {
+    "projectId": "ERP",
+    "moduleId": "Common",
+    "programId": "Notification",
+    "pageId": "All",
+    "serviceId": "notificationService.getUserNotifications",
+    "queryIds": null,
+    "beanName": "NotificationService",
+    "methodName": "getUserNotifications"
+  },
+  {
+    "projectId": "ERP",
+    "moduleId": "Common",
+    "programId": "FileManagement",
+    "pageId": "All",
+    "serviceId": "documentService.uploadOrderDocument",
+    "queryIds": null,
+    "beanName": "DocumentService",
+    "methodName": "uploadDocument"
+  }
+]

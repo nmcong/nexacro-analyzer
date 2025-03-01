@@ -75,6 +75,9 @@ const UIManager = (function () {
      * @param {string} screenId - ID màn hình cần chọn
      */
     function selectScreen(screenId) {
+        if(!isExistedScreen(screenId)) {
+            return;
+        }
         // Bỏ chọn màn hình trước đó
         const previousSelected = screenList.querySelector('.screen-item.active');
         if (previousSelected) {
@@ -142,6 +145,10 @@ const UIManager = (function () {
                 document.body.removeChild(modal);
             }
         });
+    }
+
+    function isExistedScreen(screenId) {
+        return !(!currentScreenData || !currentScreenData.screenMap[screenId]);
     }
 
     /**
@@ -365,7 +372,6 @@ const UIManager = (function () {
         if (!serviceCalls || serviceCalls.length === 0) {
             return '<p>No service calls found in this screen</p>';
         }
-
         return `
         <div class="service-calls-table-container">
             <table class="service-calls-table">
@@ -385,15 +391,12 @@ const UIManager = (function () {
                     ${serviceCalls.map((call, index) => `
                         <tr>
                             <td>${escapeHtml(call.tranId)}</td>
-                            <td>${call.type === 'direct' ? '-' : escapeHtml(call.svcId || '-')}</td>
+                            <td>${escapeHtml(call.svcId)}</td>
                             <td>${renderDatasets(call.inDss)}</td>
                             <td>${renderDatasets(call.outDs)}</td>
-                            <td>${call.type === 'direct' ? '-' :
-            call.argvs ? `<span class="service-param">${escapeHtml(call.argvs)}</span>` : '-'}</td>
-                            <td>${call.type === 'direct' ? '-' :
-            call.callback ? `<span class="service-param">${escapeHtml(call.callback)}</span>` : '-'}</td>
-                            <td>${call.type === 'direct' ? '-' :
-            call.async !== undefined ? (call.async ? 'Yes' : 'No') : '-'}</td>
+                            <td><span class="service-param">${escapeHtml(call.argvs)}</span></td>
+                            <td><span class="service-param">${escapeHtml(call.callback)}</span></td>
+                            <td>${call.async ? 'Yes' : 'No'}</td>
                             <td><button class="view-details-btn" data-service-index="${index}">Details</button></td>
                         </tr>
                     `).join('')}

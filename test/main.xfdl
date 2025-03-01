@@ -38,7 +38,7 @@
       }
 
       this.btnDashboard_onclick = function() {
-        this.gfnOpenPopup("dashboardPopup", "form::dashboard.xfdl", {userId: this.gfnGetUserInfo("id")}, "fn_dashboardCallback");
+        this.gfnOpenPopup("dashboardPopup", "form::dashboard.xfdl", {userId: this.gfnGetUserInfo("id")}, "fn_dashboardCallback", "");
       };
 
       this.btnUserList_onclick = function() {
