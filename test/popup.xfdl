@@ -1,0 +1,1 @@
+this.gfnOpenPopup("msgPopup", "common::MessagePopup.xfdl", {message: "Document uploaded successfully.", type: "info"}, "fn_msgCallback");

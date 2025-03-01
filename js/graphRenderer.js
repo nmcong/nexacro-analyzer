@@ -12,6 +12,7 @@ const GraphRenderer = (function () {
      * @param {Object} data - Dữ liệu màn hình
      */
     function initializeGraph(data) {
+        console.log(data);
         screenData = data;
         graphContainer = document.getElementById('graphContainer');
 
