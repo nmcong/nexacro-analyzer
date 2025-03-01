@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>String Extractor</title>
+    <link rel="stylesheet" href="css003.css">
+</head>
+<body>
+    <div class="navbar">
+        <h1>String Extractor</h1>
+        <input type="file" id="folderInput" webkitdirectory directory multiple style="display: none;">
+        <button class="button" onclick="document.getElementById('folderInput').click()">
+            Choose Folder
+        </button>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="search-controls">
+                <input type="text" class="input-field" id="searchInput" placeholder="Search strings...">
+                <div class="similarity-control">
+                    <label>Minimum Similarity: <span id="similarityValue">70</span>%</label>
+                    <input type="range" class="similarity-slider" id="similaritySlider" min="0" max="100" value="70">
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <div class="tabs">
+                    <div class="tab active" data-panel="wordsPanel">Words List</div>
+                    <div class="tab" data-panel="filesPanel">Files List</div>
+                </div>
+
+                <div class="panel active" id="wordsPanel">
+                    <textarea class="input-field" id="wordsList" placeholder="Enter words to search (one per line)"></textarea>
+                    <button class="button" id="processWords">Process Words</button>
+                </div>
+
+                <div class="panel" id="filesPanel">
+                    <div class="files-input-group">
+                        <label>Files to search:</label>
+                        <textarea class="input-field" id="filesList" placeholder="Enter file names to filter (one per line)"></textarea>
+                    </div>
+                    <div class="files-input-group">
+                        <label>Search terms:</label>
+                        <textarea class="input-field" id="filesSearchTerms" placeholder="Enter terms to find in files (one per line)"></textarea>
+                    </div>
+                    <div class="files-options">
+                        <label>
+                            <input type="checkbox" id="exactMatch"> Exact match
+                        </label>
+                        <label>
+                            <input type="checkbox" id="caseSensitive"> Case sensitive
+                        </label>
+                    </div>
+                    <button class="button" id="processFiles">Process Files</button>
+                </div>
+            </div>
+
+            <div class="file-list" id="fileList"></div>
+        </div>
+        
+        <div class="content" id="stringContent">
+            <div class="filter-tags">
+                <div class="tag-container">
+                    <span class="filter-tag active" data-filter="all">All</span>
+                    <span class="filter-tag" data-filter="matched">Matched</span>
+                    <span class="filter-tag" data-filter="unmatched">Unmatched</span>
+                </div>
+            </div>
+            <div id="results-container"></div>
+        </div>
+    </div>
+
+    <div id="loadingSpinner"></div>
+
+    <script src="js003.js"></script>
+</body>
+</html>

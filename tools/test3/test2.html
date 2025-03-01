@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page</title>
+    <meta description="This is a test page">
+</head>
+<body>
+    <h1 class="main-title">Welcome</h1>
+    <div id="content" data-info="important info">
+        <p class='paragraph'>This is a test paragraph</p>
+        <button onclick="alert('clicked!')">Click me</button>
+    </div>
+    <script>
+        const element = document.querySelector('.test');
+        element.setAttribute("data-value", "some value");
+    </script>
+</body>
+</html>

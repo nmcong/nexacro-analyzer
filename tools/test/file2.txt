@@ -1,0 +1,25 @@
+<span>커피&#x20;마시기</span>
+영화관&amp;극장
+한글&#47;한자&#47;영어
+책을%20읽어요
+친구와&#x0A;공원에&#x0A;갔어요
+<b>불고기</b>가 맛있어요!
+<table>
+    <tr>
+        <td>이름</td>
+        <td><input type="text" value="김철수" /></td>
+    </tr>
+    <tr>
+        <td>취미</td>
+        <td><select>
+            <option>영화 보기</option>
+            <option>음악 듣기</option>
+        </select></td>
+    </tr>
+</table>
+
+<form>
+    <label>좋아하는 과일:</label>
+    <input type="checkbox" value="사과" />사과
+    <input type="checkbox" value="바나나" />바나나
+</form>

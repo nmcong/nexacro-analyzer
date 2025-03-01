@@ -82,7 +82,10 @@ const ServiceAnalyzer = (function () {
 
         for (const file of javaFiles) {
             const content = file.content;
-            const className = file.name.replace('.java', '');
+            console.log(content);
+            console.log("====>");
+            let methods = parseJavaMethods(content);
+            console.log(methods);
 
             // Extract class annotation to identify Spring beans
             const classAnnotationMatch = content.match(/@(Controller|Service|Component|Repository)(?:\([^)]*\))?\s+(?:public\s+)?class\s+(\w+)/);
@@ -297,7 +300,7 @@ const ServiceAnalyzer = (function () {
    `;
     }
 
-// Simple SQL syntax highlighting function
+    // Simple SQL syntax highlighting function
     function applySqlSyntaxHighlighting(sql) {
         if (!sql) return '';
 
@@ -394,7 +397,7 @@ const ServiceAnalyzer = (function () {
         return highlighted;
     }
 
-// Copy to clipboard function (add to your script)
+    // Copy to clipboard function (add to your script)
     function copyToClipboard(button) {
         const pre = button.nextElementSibling;
         const code = pre.textContent;
@@ -434,6 +437,72 @@ const ServiceAnalyzer = (function () {
         return text.toString().replace(/[&<>"']/g, function (m) {
             return map[m];
         });
+    }
+
+    function parseJavaMethods(javaCode) {
+        // Xóa các block comment /* ... */
+        javaCode = javaCode.replace(/\/\*[\s\S]*?\*\//g, '');
+        // Xóa các line comment // ...
+        javaCode = javaCode.replace(/\/\/.*/g, '');
+
+        const methodRegex = /(@Transactional\([^)]*\)|@Transactional)?\s*public\s+([\w<>,\s]+?)\s+(\w+)\s*\(([^)]*)\)\s*{/g;
+        const methods = [];
+        let match;
+
+        while ((match = methodRegex.exec(javaCode)) !== null) {
+            const startIdx = match.index + match[0].length;
+            let braceCount = 1;
+            let endIdx = startIdx;
+
+            while (braceCount > 0 && endIdx < javaCode.length) {
+                const char = javaCode[endIdx];
+                if (char === '{') braceCount++;
+                else if (char === '}') braceCount--;
+                endIdx++;
+            }
+
+            const methodBody = javaCode.substring(startIdx, endIdx - 1).trim();
+            methods.push({
+                annotation: match[1] ? match[1].trim() : '',
+                returnType: match[2].trim(),
+                methodName: match[3].trim(),
+                parameters: match[4].trim(),
+                body: methodBody
+            });
+        }
+
+        return methods;
+    }
+
+    function extractMethodsFromJavaFile(fileContent) {
+        // Biểu thức chính quy để tìm các method
+        const methodRegex = /(?:@\w+\s*)*(?:public|private|protected)\s+[\w<>]+\s+\w+\s*\([^)]*\)\s*{([\s\S]*?)}/g;
+
+        let match;
+        const methods = [];
+
+        // Tìm và trích xuất các method
+        while ((match = methodRegex.exec(fileContent)) !== null) {
+            console.log("######### " + match[1]);
+            // Trích xuất toàn bộ method (bao gồm signature và body)
+            const fullMethod = match[0];
+
+            // Trích xuất signature
+            const signatureMatch = fullMethod.match(/(?:@\w+\s*)*(?:public|private|protected)\s+[\w<>]+\s+\w+\s*\([^)]*\)/);
+            const signature = signatureMatch ? signatureMatch[0] : '';
+
+            // Trích xuất body method
+            const bodyMatch = fullMethod.match(/{([\s\S]*?)}/);
+            const body = bodyMatch ? bodyMatch[1].trim() : '';
+
+            methods.push({
+                fullMethod: fullMethod,
+                signature: signature,
+                body: body
+            });
+        }
+
+        return methods;
     }
 
     // Public API

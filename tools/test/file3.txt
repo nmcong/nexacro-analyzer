@@ -1,0 +1,27 @@
+음악+댄스+공연
+한국의&lt;문화&gt;
+드라마를    보고&#x0020;있어요
+&#49828;&#53440;&#48293;&#49828;
+안녕
+  하세요
+    반갑
+      습니다
+
+<script>
+    const greeting = "안녕하세요";
+    // 한국어 인사말
+    console.log(greeting);
+</script>
+
+<style>
+    .korean-text {
+        /* 한글 폰트 설정 */
+        font-family: "맑은 고딕";
+    }
+</style>
+
+<div class="korean-text">
+    <!-- 주석: 한국 문화 소개 -->
+    <a href="culture.html">한국의 문화</a>
+    <img src="korea.jpg" alt="한국의 전통 음식" />
+</div>

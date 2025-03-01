@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FDL version="2.1">
+  <Form>
+    <Combo id="Combo00">
+      <Dataset id="innerdataset">
+        <ColumnInfo>
+          <Column id="codecolumn" size="256"/>
+          <Column id="datacolumn" size="256"/>
+        </ColumnInfo>
+        <Rows>
+          <Row>
+            <Col id="codecolumn">1</Col>
+            <Col id="datacolumn">First Item</Col>
+          </Row>
+          <Row>
+            <Col id="codecolumn">2</Col>
+            <Col id="datacolumn">Second Item</Col>
+          </Row>
+        </Rows>
+      </Dataset>
+    </Combo>
+    <Button id="Button00" text="Click Me"/>
+    <Static id="Static00" text="Welcome to Nexacro"/>
+  </Form>
+</FDL>

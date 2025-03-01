@@ -1,0 +1,22 @@
+{
+    "name": "Test Project",
+    "version": "1.0.0",
+    "description": "A test project with many strings",
+    "keywords": [
+        "test",
+        "example",
+        "strings"
+    ],
+    "config": {
+        "api_key": "abc123xyz",
+        "secret": "this is a \"secret\" value",
+        "url": "https://api.example.com",
+        "message": "String with 'mixed' quotes"
+    },
+    "nested": {
+        "level1": {
+            "level2": "deeply nested string",
+            "special": "String with \\ backslash"
+        }
+    }
+}
