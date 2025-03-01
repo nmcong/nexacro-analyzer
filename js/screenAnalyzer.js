@@ -7,6 +7,11 @@ const ScreenAnalyzer = (function () {
      * @param {Object} projectData - Dữ liệu dự án
      * @returns {Object} - Dữ liệu màn hình đã phân tích
      */
+    /**
+     * Phân tích dữ liệu màn hình và tìm mối quan hệ giữa chúng
+     * @param {Object} projectData - Dữ liệu dự án
+     * @returns {Object} - Dữ liệu màn hình đã phân tích
+     */
     function analyzeScreens(projectData) {
         const screens = projectData.screens;
         const screenMap = {};
@@ -44,6 +49,15 @@ const ScreenAnalyzer = (function () {
                 });
             }
         });
+
+        // Xử lý thêm nếu dữ liệu đã import
+        if (projectData.isImported) {
+            // Với dữ liệu đã import, thêm vào các trường bổ sung nếu cần
+            Object.values(screenMap).forEach(screen => {
+                // Đảm bảo có các trường cần thiết
+                screen.isImported = true;
+            });
+        }
 
         return {
             screens: Object.values(screenMap),

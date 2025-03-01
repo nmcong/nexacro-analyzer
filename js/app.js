@@ -10,11 +10,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const mainContent = document.getElementById('mainContent');
     const projectLoader = document.querySelector('.project-loader');
     const clearCacheBtn = document.getElementById('clearCacheBtn');
+    const exportDataBtn = document.getElementById('exportDataBtn');
     const cacheStatus = document.getElementById('cacheStatus');
     const searchInput = document.getElementById('searchInput');
+    const selectedFolder = document.getElementById('selectedFolder');
+    const folderName = document.getElementById('folderName');
+    const fileCount = document.getElementById('fileCount');
 
-    // Khởi tạo bộ nhớ đệm và kiểm tra dữ liệu
+    // Dữ liệu dự án hiện tại
+    let currentProjectData = null;
+
+    // Khởi tạo các module
     CacheManager.initialize();
+    FolderManager.initialize(selectedFolder, folderName, fileCount);
     updateCacheStatus();
 
     // Nếu có dữ liệu trong bộ nhớ đệm, hiển thị nút để tải dữ liệu từ cache
@@ -48,6 +56,14 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         uploadArea.classList.remove('dragover');
         fileInput.files = e.dataTransfer.files;
+
+        // Cập nhật thông tin folder
+        FolderManager.updateFolderInfo(fileInput.files);
+    });
+
+    // Khi chọn file, cập nhật thông tin folder
+    fileInput.addEventListener('change', function() {
+        FolderManager.updateFolderInfo(this.files);
     });
 
     // Khi click vào khu vực tải lên, mở cửa sổ chọn thư mục
@@ -88,10 +104,43 @@ document.addEventListener('DOMContentLoaded', function () {
         updateCacheStatus();
     });
 
+    // Xử lý xuất dữ liệu
+    exportDataBtn.addEventListener('click', function () {
+        if (!currentProjectData) {
+            alert('Không có dữ liệu dự án để xuất');
+            return;
+        }
+
+        ExportManager.exportProjectData(currentProjectData);
+    });
+
     // Xử lý tìm kiếm
     searchInput.addEventListener('input', function () {
         const query = this.value.toLowerCase();
         UIManager.filterScreenList(query);
+    });
+
+    // Trong phần document.addEventListener('DOMContentLoaded', function () {
+    // Thêm tham chiếu đến nút import
+    const importDataBtn = document.getElementById('importDataBtn');
+
+    // Xử lý sự kiện import dữ liệu
+    importDataBtn.addEventListener('click', function () {
+        ImportManager.importProjectData(function(importedData) {
+            if (importedData) {
+                // Hiển thị thông báo thành công
+                alert(`Đã import thành công dữ liệu dự án "${importedData.projectName}" với ${importedData.screens.length} màn hình.`);
+
+                // Xử lý dữ liệu đã import
+                processProjectData(importedData);
+
+                // Tùy chọn: Lưu vào bộ nhớ đệm
+                if (confirm('Bạn có muốn lưu dữ liệu đã import vào bộ nhớ đệm không?')) {
+                    CacheManager.saveToCache(importedData);
+                    updateCacheStatus();
+                }
+            }
+        });
     });
 
     // Cập nhật trạng thái bộ nhớ đệm
@@ -104,31 +153,34 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Update in app.js
+    // Xử lý dữ liệu dự án
     function processProjectData(projectData) {
         try {
-            // Analyze screens
+            // Lưu dữ liệu dự án hiện tại
+            currentProjectData = projectData;
+
+            // Phân tích màn hình
             const screenData = ScreenAnalyzer.analyzeScreens(projectData);
 
-            // Display screen list
+            // Hiển thị danh sách màn hình
             UIManager.displayScreenList(screenData, projectData);
 
-            // Debug relationship counts
+            // Ghi log thông tin debug
             console.log("Screens:", screenData.screens.length);
             console.log("Found relationships:", screenData.screens.reduce((sum, screen) =>
                 sum + screen.childScreens.length, 0));
             console.log("Service calls:", screenData.screens.reduce((sum, screen) =>
                 sum + (screen.serviceCalls ? screen.serviceCalls.length : 0), 0));
 
-            // Hide loader and show main content
-            document.querySelector('.project-loader').classList.add('hidden');
-            document.getElementById('mainContent').classList.remove('hidden');
+            // Ẩn loader và hiển thị nội dung chính
+            projectLoader.classList.add('hidden');
+            mainContent.classList.remove('hidden');
 
-            // Initialize graph after DOM update
+            // Khởi tạo đồ thị sau khi cập nhật DOM
             setTimeout(() => {
                 GraphRenderer.initializeGraph(screenData);
 
-                // Force a resize after a short delay to ensure proper rendering
+                // Force resize sau một khoảng thời gian ngắn để đảm bảo hiển thị đúng
                 setTimeout(() => {
                     window.dispatchEvent(new Event('resize'));
                 }, 100);

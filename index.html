@@ -30,6 +30,11 @@
             <p>Chọn thư mục dự án hoặc kéo thả các file vào đây</p>
             <input directory id="fileInput" multiple type="file" webkitdirectory>
         </div>
+        <div id="selectedFolder" class="selected-folder-info hidden">
+            <i class="fas fa-folder"></i>
+            <span id="folderName">Chưa chọn thư mục</span>
+            <small id="fileCount"></small>
+        </div>
         <button class="primary-button" id="loadButton">Tải dự án</button>
         <div class="loading-indicator hidden" id="loadingIndicator">
             <div class="spinner"></div>
@@ -83,6 +88,8 @@
         <div class="cache-info">
             <span id="cacheStatus">Bộ nhớ đệm: Không có dữ liệu</span>
             <button class="secondary-button" id="clearCacheBtn">Xóa bộ nhớ đệm</button>
+            <button class="secondary-button export-btn" id="exportDataBtn">Xuất dữ liệu</button>
+            <button class="secondary-button import-btn" id="importDataBtn">Nhập dữ liệu</button>
         </div>
     </footer>
 </div>
@@ -91,6 +98,9 @@
 <script src="js/serviceAnalyzer.js"></script>
 <script src="js/screenAnalyzer.js"></script>
 <script src="js/cacheManager.js"></script>
+<script src="js/folderManager.js"></script>
+<script src="js/exportManager.js"></script>
+<script src="js/importManager.js"></script>
 <script src="js/uiManager.js"></script>
 <script src="js/graphRenderer.js"></script>
 <script src="js/app.js"></script>

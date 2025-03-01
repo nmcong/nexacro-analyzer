@@ -240,3 +240,57 @@
 .modal-close-button:hover {
     color: var(--danger-color);
 }
+
+/* Selected Folder Info */
+.selected-folder-info {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+    padding: 12px 15px;
+    background-color: #f0f4f8;
+    border-radius: var(--border-radius);
+    border: 1px solid #d0d7de;
+    transition: var(--transition);
+}
+
+.selected-folder-info i {
+    color: var(--accent-color);
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.selected-folder-info span {
+    font-weight: 500;
+    color: var(--secondary-color);
+}
+
+.selected-folder-info small {
+    margin-left: 10px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Import/Export Buttons */
+.secondary-button.import-btn {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-color: #a5d6a7;
+    margin-left: 10px;
+}
+
+.secondary-button.import-btn:hover {
+    background-color: #c8e6c9;
+    border-color: #81c784;
+}
+
+.secondary-button.export-btn {
+    background-color: #e3f2fd;
+    color: #1565c0;
+    border-color: #90caf9;
+    margin-left: 10px;
+}
+
+.secondary-button.export-btn:hover {
+    background-color: #bbdefb;
+    border-color: #64b5f6;
+}
