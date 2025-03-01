@@ -1,0 +1,99 @@
+/* base.css - Core styles, variables, and reset */
+
+:root {
+    /* Color palette */
+    --primary-color: #4a6baf;
+    --primary-light: #7891d0;
+    --primary-dark: #3a5590;
+    --secondary-color: #2c3e50;
+    --accent-color: #3498db;
+    --light-color: #ecf0f1;
+    --dark-color: #2c3e50;
+    --success-color: #2ecc71;
+    --warning-color: #e67e22;
+    --danger-color: #e74c3c;
+
+    /* UI elements */
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-soft: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-strong: 0 8px 16px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --border-radius-sm: 4px;
+    --border-radius-lg: 12px;
+    --transition: all 0.3s ease;
+
+    /* Typography */
+    --font-heading: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-body: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-code: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Consolas', monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-body);
+}
+
+body {
+    background-color: #f5f7fa;
+    color: var(--dark-color);
+    line-height: 1.6;
+    height: 100vh;
+    overflow: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 0.5em;
+    color: var(--secondary-color);
+}
+
+h1 {
+    font-size: 24px;
+}
+
+h2 {
+    font-size: 20px;
+}
+
+h3 {
+    font-size: 18px;
+}
+
+h4 {
+    font-size: 16px;
+}
+
+h5 {
+    font-size: 14px;
+}
+
+h6 {
+    font-size: 13px;
+}
+
+p {
+    margin-bottom: 1em;
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+button {
+    cursor: pointer;
+}
+
+.hidden {
+    display: none !important;
+}

@@ -1,0 +1,140 @@
+/* responsive.css - Media queries for different screen sizes */
+
+/* Large screens (desktops, less than 1400px) */
+@media (max-width: 1400px) {
+    .app-container {
+        padding: 15px;
+    }
+}
+
+/* Medium screens (laptops, less than 1200px) */
+@media (max-width: 1200px) {
+    .main-content {
+        flex-direction: column;
+        height: auto;
+        overflow: auto;
+    }
+
+    .sidebar {
+        width: 100%;
+        min-width: auto;
+        max-height: 300px;
+    }
+
+    .content-area {
+        width: 100%;
+    }
+
+    .screen-details, .relationship-graph {
+        max-height: 600px;
+    }
+
+    .query-header, .bean-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .query-file, .bean-file {
+        margin-top: 5px;
+    }
+}
+
+/* Small screens (tablets, less than 992px) */
+@media (max-width: 992px) {
+    header h1 {
+        font-size: 20px;
+    }
+
+    .detail-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 5px;
+    }
+
+    .detail-tab {
+        padding: 8px 15px;
+    }
+
+    .service-call-modal-content {
+        width: 90%;
+        max-height: 85vh;
+    }
+
+    .code-block pre {
+        font-size: 13px;
+    }
+}
+
+/* Extra small screens (mobile phones, less than 768px) */
+@media (max-width: 768px) {
+    .app-container {
+        padding: 10px;
+    }
+
+    header {
+        padding: 15px;
+    }
+
+    .project-loader {
+        padding: 20px;
+    }
+
+    .upload-area {
+        padding: 20px;
+    }
+
+    .primary-button {
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+
+    .detail-tab {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .service-call-modal-content {
+        width: 95%;
+        max-height: 90vh;
+        padding: 15px;
+    }
+
+    .related-method-list {
+        flex-direction: column;
+    }
+
+    .code-block .copy-button {
+        opacity: 1;
+    }
+}
+
+/* Very small screens (small mobile phones, less than 576px) */
+@media (max-width: 576px) {
+    header h1 {
+        font-size: 18px;
+    }
+
+    .screen-details, .relationship-graph {
+        padding: 15px;
+    }
+
+    .detail-tab {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    .tab-content {
+        max-height: calc(100% - 40px);
+    }
+
+    .code-block pre {
+        padding: 15px;
+        font-size: 12px;
+    }
+
+    .bean-method-signature {
+        padding: 8px;
+        font-size: 12px;
+        overflow-x: auto;
+    }
+}

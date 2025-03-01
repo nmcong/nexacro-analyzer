@@ -1,0 +1,42 @@
+[
+  {
+    "projectId": "MyProject",
+    "moduleId": "user",
+    "programId": "userManager",
+    "pageId": "userList",
+    "serviceId": "userService.searchUsers",
+    "queryIds": "selectUserList,countUsers",
+    "beanName": null,
+    "methodName": null
+  },
+  {
+    "projectId": "MyProject",
+    "moduleId": "user",
+    "programId": "userManager",
+    "pageId": "userDetail",
+    "serviceId": "userService.getUserDetail",
+    "queryIds": "selectUserDetail",
+    "beanName": null,
+    "methodName": null
+  },
+  {
+    "projectId": "MyProject",
+    "moduleId": "product",
+    "programId": "productManager",
+    "pageId": "productList",
+    "serviceId": "productService.getProductDetail",
+    "queryIds": null,
+    "beanName": "ProductService",
+    "methodName": "getProductDetail"
+  },
+  {
+    "projectId": "MyProject",
+    "moduleId": "product",
+    "programId": "productManager",
+    "pageId": "productDetail",
+    "serviceId": "productService.saveProduct",
+    "queryIds": null,
+    "beanName": "ProductService",
+    "methodName": "saveProduct"
+  }
+]

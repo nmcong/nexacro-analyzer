@@ -1,0 +1,111 @@
+/* screens.css - Styles specific to the screen analysis */
+
+/* Screen List Items */
+.screen-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.screen-item:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.screen-item.active {
+    background-color: rgba(52, 152, 219, 0.2);
+    border-left: 4px solid var(--accent-color);
+}
+
+.screen-name {
+    font-weight: 500;
+    margin-bottom: 3px;
+}
+
+.screen-popup-count {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+/* Screen Info Section */
+.screen-info {
+    margin-bottom: 20px;
+}
+
+.screen-info h3 {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.screen-info p {
+    margin-bottom: 8px;
+}
+
+/* Related Screens Section */
+.related-screens {
+    margin-top: 20px;
+}
+
+.related-screens h3 {
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.related-screens-list {
+    margin-bottom: 20px;
+}
+
+.related-screen {
+    padding: 10px;
+    background-color: #f8f9fa;
+    margin-bottom: 10px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.related-screen:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+    transform: translateX(2px);
+}
+
+.related-screen-name {
+    font-weight: 500;
+}
+
+.related-screen-popup-id {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 3px;
+}
+
+/* Popup Calls Table */
+.popup-calls-table-container {
+    overflow-x: auto;
+    margin-top: 15px;
+}
+
+.popup-calls-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.popup-calls-table th {
+    background-color: #f2f6fc;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 2px solid #ddd;
+}
+
+.popup-calls-table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+
+.popup-calls-table tr:hover {
+    background-color: #f9f9f9;
+}

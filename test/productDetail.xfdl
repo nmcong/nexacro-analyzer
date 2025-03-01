@@ -1,0 +1,130 @@
+<XFDL version="2.0">
+  <Form id="productDetail" width="600" height="400" titletext="Product Detail">
+    <Layouts>
+      <Layout>
+        <Static id="lblProductId" left="20" top="20" width="100" height="30" text="Product ID:"/>
+        <Edit id="edtProductId" left="130" top="20" width="200" height="30"/>
+        <Static id="lblName" left="20" top="60" width="100" height="30" text="Product Name:"/>
+        <Edit id="edtName" left="130" top="60" width="200" height="30"/>
+        <Static id="lblPrice" left="20" top="100" width="100" height="30" text="Price:"/>
+        <Edit id="edtPrice" left="130" top="100" width="200" height="30"/>
+        <Button id="btnSave" left="380" top="340" width="100" height="30" text="Save"/>
+        <Button id="btnCancel" left="490" top="340" width="100" height="30" text="Cancel"/>
+        <Button id="btnLoadImage" left="340" top="60" width="100" height="30" text="Load Image"/>
+        <Button id="btnInventory" left="340" top="100" width="100" height="30" text="Check Inventory"/>
+      </Layout>
+    </Layouts>
+    <Script>
+      // Initialize service
+      this.fn_initService = function()
+      {
+        // Product detail services
+        this.dsProductService = new Dataset("dsProductService");
+        this.dsProductService.addColumn("tranId", "string");
+        this.dsProductService.addColumn("svcId", "string");
+        this.dsProductService.addColumn("inDss", "string");
+        this.dsProductService.addColumn("outDs", "string");
+        this.dsProductService.addColumn("argvs", "string");
+        this.dsProductService.addColumn("cback", "string");
+        this.dsProductService.addColumn("async", "boolean");
+
+        // Load product detail service
+        this.dsProductService.addRow();
+        this.dsProductService.setColumn(0, "tranId", "load_product");
+        this.dsProductService.setColumn(0, "svcId", "productService.getProductDetail");
+        this.dsProductService.setColumn(0, "inDss", "");
+        this.dsProductService.setColumn(0, "outDs", "dsProduct=product");
+        this.dsProductService.setColumn(0, "argvs", "productId=" + this.paramProductId);
+        this.dsProductService.setColumn(0, "cback", "fn_loadCallback");
+        this.dsProductService.setColumn(0, "async", true);
+
+        // Save product service
+        this.dsProductService.addRow();
+        this.dsProductService.setColumn(1, "tranId", "save_product");
+        this.dsProductService.setColumn(1, "svcId", "productService.saveProduct");
+        this.dsProductService.setColumn(1, "inDss", "dsProduct=product");
+        this.dsProductService.setColumn(1, "outDs", "");
+        this.dsProductService.setColumn(1, "argvs", "userId=" + this.gfnGetUserInfo("id"));
+        this.dsProductService.setColumn(1, "cback", "fn_saveCallback");
+        this.dsProductService.setColumn(1, "async", true);
+
+        // Check inventory service
+        this.dsProductService.addRow();
+        this.dsProductService.setColumn(2, "tranId", "check_inventory");
+        this.dsProductService.setColumn(2, "svcId", "inventoryService.checkProductStock");
+        this.dsProductService.setColumn(2, "inDss", "");
+        this.dsProductService.setColumn(2, "outDs", "dsInventory=inventory");
+        this.dsProductService.setColumn(2, "argvs", "productId=" + this.paramProductId + " locationId=ALL");
+        this.dsProductService.setColumn(2, "cback", "fn_inventoryCallback");
+        this.dsProductService.setColumn(2, "async", true);
+      }
+
+      this.productDetail_onload = function() {
+        this.paramProductId = this.parent.productId;
+        this.fn_initService();
+
+        // Load product data
+        this.gfnCallService("load_product");
+      };
+
+      this.btnSave_onclick = function() {
+        // Update product dataset from UI fields
+        this.dsProduct.setColumn(0, "productName", this.edtName.value);
+        this.dsProduct.setColumn(0, "price", this.edtPrice.value);
+
+        // Save product
+        this.gfnCallService("save_product");
+      };
+
+      this.btnCancel_onclick = function() {
+        if (this.isModified()) {
+          this.gfnOpenPopup("confirmPopup", "form::common/popup.xfdl", {message:"Discard changes?"}, "fn_confirmCallback", "modal=true,width=300,height=200");
+        } else {
+          this.close();
+        }
+      };
+
+      this.btnInventory_onclick = function() {
+        // Check inventory
+        this.gfnCallService("check_inventory");
+      };
+
+      this.btnLoadImage_onclick = function() {
+        // Example of different service call pattern
+        this.transaction("load_image",
+                        "imageService.getProductImage",
+                        "",
+                        "dsImage=imageData",
+                        "productId=" + this.paramProductId,
+                        "fn_imageCallback");
+      };
+
+      this.fn_loadCallback = function(tranId, errorCode, errorMsg) {
+        if (errorCode != 0) {
+          alert("Error loading product: " + errorMsg);
+          return;
+        }
+
+        // Update UI with product data
+        this.edtProductId.set_value(this.dsProduct.getColumn(0, "productId"));
+        this.edtName.set_value(this.dsProduct.getColumn(0, "productName"));
+        this.edtPrice.set_value(this.dsProduct.getColumn(0, "price"));
+      };
+
+      this.fn_saveCallback = function(tranId, errorCode, errorMsg) {
+        if (errorCode != 0) {
+          this.gfnOpenPopup("messagePopup", "form::common/message.xfdl", {message:"Error saving product: " + errorMsg}, "fn_messageCallback");
+          return;
+        }
+
+        this.close("OK");
+      };
+
+      this.fn_confirmCallback = function(id, code, data) {
+        if (code == "OK") {
+          this.close();
+        }
+      };
+    </Script>
+  </Form>
+</XFDL>

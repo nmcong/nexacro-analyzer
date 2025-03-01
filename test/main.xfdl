@@ -1,0 +1,66 @@
+<XFDL version="2.0">
+  <Form id="main" width="1280" height="720" titletext="Main Form">
+    <Layouts>
+      <Layout>
+        <Button id="btnDashboard" left="20" top="20" width="120" height="30" text="Dashboard"/>
+        <Button id="btnUserList" left="150" top="20" width="120" height="30" text="User List"/>
+        <Button id="btnProductList" left="280" top="20" width="120" height="30" text="Product List"/>
+      </Layout>
+    </Layouts>
+    <Script>
+      // Initialize service dataset for main service calls
+      this.fn_initService = function()
+      {
+        this.dsService = new Dataset("dsService");
+        this.dsService.addColumn("tranId", "string");
+        this.dsService.addColumn("svcId", "string");
+        this.dsService.addColumn("inDss", "string");
+        this.dsService.addColumn("outDs", "string");
+        this.dsService.addColumn("argvs", "string");
+        this.dsService.addColumn("cback", "string");
+        this.dsService.addColumn("async", "boolean");
+
+        this.dsService.addRow();
+        this.dsService.setColumn(0, "tranId", "main_init");
+        this.dsService.setColumn(0, "svcId", "mainService.initMainData");
+        this.dsService.setColumn(0, "inDss", "");
+        this.dsService.setColumn(0, "outDs", "dsMenu=menu dsNotice=notice");
+        this.dsService.setColumn(0, "argvs", "userID=" + this.gfnGetUserInfo("id"));
+        this.dsService.setColumn(0, "cback", "fn_callback");
+        this.dsService.setColumn(0, "async", true);
+      }
+
+      this.main_onload = function()
+      {
+        this.fn_initService();
+        // Call main init service
+        this.gfnCallService("main_init");
+      }
+
+      this.btnDashboard_onclick = function() {
+        this.gfnOpenPopup("dashboardPopup", "form::dashboard.xfdl", {userId: this.gfnGetUserInfo("id")}, "fn_dashboardCallback");
+      };
+
+      this.btnUserList_onclick = function() {
+        this.gfnOpenPopup("userListPopup", "form::user/userList.xfdl", {}, "fn_userListCallback", "modal=true,width=800,height=600");
+      };
+
+      this.btnProductList_onclick = function() {
+        this.gfnOpenPopup("productListPopup", "form::product/productList.xfdl", {}, "fn_productListCallback", "modal=true,width=800,height=600");
+      };
+
+      this.fn_callback = function(tranId, errorCode, errorMsg)
+      {
+        if (errorCode != 0) {
+          this.gfnOpenPopup("messagePopup", "form::common/message.xfdl", {message: errorMsg}, "fn_messageCallback");
+          return;
+        }
+
+        // Process menu data
+        if (tranId == "main_init") {
+          // Processing logic here
+        }
+      };
+    </Script>
+  </Form>
+</XFDL>

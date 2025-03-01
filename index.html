@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Nexacro Screen Analyzer</title>
+    <!-- CSS files in order of specificity -->
+    <link href="css/base.css" rel="stylesheet">
+    <link href="css/layout.css" rel="stylesheet">
+    <link href="css/components.css" rel="stylesheet">
+    <link href="css/screens.css" rel="stylesheet">
+    <link href="css/services.css" rel="stylesheet">
+    <link href="css/code-highlighting.css" rel="stylesheet">
+    <link href="css/utilities.css" rel="stylesheet">
+    <link href="css/responsive.css" rel="stylesheet">
+    <!-- External dependencies -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-container">
+    <header>
+        <h1>Nexacro Screen Analyzer</h1>
+    </header>
+
+    <div class="project-loader">
+        <h2>Tải lên dự án Nexacro</h2>
+        <div class="upload-area" id="uploadArea">
+            <i class="fas fa-folder-open"></i>
+            <p>Chọn thư mục dự án hoặc kéo thả các file vào đây</p>
+            <input directory id="fileInput" multiple type="file" webkitdirectory>
+        </div>
+        <button class="primary-button" id="loadButton">Tải dự án</button>
+        <div class="loading-indicator hidden" id="loadingIndicator">
+            <div class="spinner"></div>
+            <p>Đang phân tích dự án...</p>
+        </div>
+    </div>
+
+    <div class="main-content hidden" id="mainContent">
+        <div class="sidebar">
+            <div class="search-container">
+                <input id="searchInput" placeholder="Tìm màn hình..." type="text">
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="screen-list" id="screenList">
+                <!-- Danh sách màn hình sẽ được hiển thị ở đây -->
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="screen-details" id="screenDetails">
+                <div class="detail-tabs">
+                    <div class="detail-tab active" data-tab="screen-info">Thông tin màn hình</div>
+                    <div class="detail-tab" data-tab="popup-calls">Popup Calls</div>
+                    <div class="detail-tab" data-tab="service-calls">Service Calls</div>
+                </div>
+
+                <div class="tab-content active" id="screen-info-tab">
+                    <h2>Chọn một màn hình để xem chi tiết</h2>
+                    <div class="screen-info-content"></div>
+                </div>
+
+                <div class="tab-content" id="popup-calls-tab">
+                    <h3>Popup Calls</h3>
+                    <div class="popup-calls-content"></div>
+                </div>
+
+                <div class="tab-content" id="service-calls-tab">
+                    <h3>Service Calls</h3>
+                    <div class="service-calls-content"></div>
+                </div>
+            </div>
+
+            <div class="relationship-graph">
+                <h3>Mối quan hệ giữa các màn hình</h3>
+                <div id="graphContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="cache-info">
+            <span id="cacheStatus">Bộ nhớ đệm: Không có dữ liệu</span>
+            <button class="secondary-button" id="clearCacheBtn">Xóa bộ nhớ đệm</button>
+        </div>
+    </footer>
+</div>
+
+<script src="js/nexacroFileReader.js"></script>
+<script src="js/serviceAnalyzer.js"></script>
+<script src="js/screenAnalyzer.js"></script>
+<script src="js/cacheManager.js"></script>
+<script src="js/uiManager.js"></script>
+<script src="js/graphRenderer.js"></script>
+<script src="js/app.js"></script>
+<script>
+    // Copy to clipboard function for code blocks
+    function copyToClipboard(button) {
+        const pre = button.nextElementSibling;
+        const code = pre.textContent;
+
+        navigator.clipboard.writeText(code).then(() => {
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            button.style.backgroundColor = '#d1fae5';
+            button.style.borderColor = '#059669';
+            button.style.color = '#059669';
+
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.backgroundColor = '';
+                button.style.borderColor = '';
+                button.style.color = '';
+            }, 2000);
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+</script>
+</body>
+</html>

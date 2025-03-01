@@ -1,0 +1,113 @@
+<XFDL version="2.0">
+  <Form id="userList" width="800" height="600" titletext="User List">
+    <Layouts>
+      <Layout>
+        <Grid id="grdUserList" left="20" top="60" width="760" height="480"/>
+        <Button id="btnSearch" left="20" top="20" width="80" height="30" text="Search"/>
+        <Button id="btnAdd" left="680" top="20" width="100" height="30" text="Add User"/>
+        <Button id="btnDetail" left="570" top="20" width="100" height="30" text="View Detail"/>
+      </Layout>
+    </Layouts>
+    <Script>
+      // Multiple service definitions with different parameter styles
+      this.fn_initService = function()
+      {
+        // Service dataset for user operations
+        this.dsUserService = new Dataset("dsUserService");
+        this.dsUserService.addColumn("tranId", "string");
+        this.dsUserService.addColumn("svcId", "string");
+        this.dsUserService.addColumn("inDss", "string");
+        this.dsUserService.addColumn("outDs", "string");
+        this.dsUserService.addColumn("argvs", "string");
+        this.dsUserService.addColumn("cback", "string");
+        this.dsUserService.addColumn("async", "boolean");
+        
+        // Define search service
+        this.dsUserService.addRow();
+        this.dsUserService.setColumn(0, "tranId", "search_users");
+        this.dsUserService.setColumn(0, "svcId", "userService.searchUsers");
+        this.dsUserService.setColumn(0, "inDss", "dsSearchParam=searchParam");
+        this.dsUserService.setColumn(0, "outDs", "dsUserList=userList");
+        this.dsUserService.setColumn(0, "argvs", "");
+        this.dsUserService.setColumn(0, "cback", "fn_searchCallback");
+        this.dsUserService.setColumn(0, "async", true);
+        
+        // Define delete service
+        this.dsUserService.addRow();
+        this.dsUserService.setColumn(1, "tranId", "delete_user");
+        this.dsUserService.setColumn(1, "svcId", "userService.deleteUser");
+        this.dsUserService.setColumn(1, "inDss", "dsSelectedUser=selectedUser");
+        this.dsUserService.setColumn(1, "outDs", "");
+        this.dsUserService.setColumn(1, "argvs", "userType=admin");
+        this.dsUserService.setColumn(1, "cback", "fn_deleteCallback");
+        this.dsUserService.setColumn(1, "async", false);
+      }
+      
+      this.userList_onload = function()
+      {
+        this.fn_initService();
+        this.fn_searchUsers();
+      }
+      
+      this.fn_searchUsers = function()
+      {
+        // Prepare search parameters
+        this.dsSearchParam.clearData();
+        this.dsSearchParam.addRow();
+        this.dsSearchParam.setColumn(0, "searchKeyword", this.edtSearchKeyword.value);
+        this.dsSearchParam.setColumn(0, "searchType", this.cboSearchType.value);
+        
+        // Call search service
+        this.gfnCallService("search_users");
+      }
+      
+      this.btnSearch_onclick = function() {
+        this.fn_searchUsers();
+      };
+      
+      this.btnAdd_onclick = function() {
+        this.gfnOpenPopup("userRegisterPopup", "form::user/userRegister.xfdl", {mode:"add"}, "fn_registerCallback", "modal=true,width=600,height=400");
+      };
+      
+      this.btnDetail_onclick = function() {
+        const userId = this.grdUserList.getSelectedId();
+        if (userId) {
+          const oArg = {userId: userId, mode: "view"};
+          this.gfnOpenPopup("userDetailPopup", "form::user/userDetail.xfdl", oArg, "fn_detailCallback", "modal=true,width=600,height=400");
+        } else {
+          this.gfnOpenPopup("messagePopup", "form::common/message.xfdl", {message:"Please select a user"}, "fn_messageCallback");
+        }
+      };
+
+      // Direct service call example without using dsService
+      this.btnExport_onclick = function() {
+        // Create parameters directly
+        const params = {
+          fileType: "excel",
+          fileName: "UserList_" + this.gfnGetDate(),
+          sheetName: "Users"
+        };
+
+        // Direct service call
+        this.transaction("export_users",
+                         "userService.exportUsers",
+                         "dsUserList=dsUserList",
+                         "",
+                         "params=" + JSON.stringify(params),
+                         "fn_exportCallback",
+                         false);
+      }
+
+      this.fn_searchCallback = function(tranId, errorCode, errorMsg)
+      {
+        if (errorCode != 0) {
+          alert("Error searching users: " + errorMsg);
+          return;
+        }
+
+        // Update grid with search results
+        this.grdUserList.redraw();
+      };
+    </Script>
+  </Form>
+</XFDL>
