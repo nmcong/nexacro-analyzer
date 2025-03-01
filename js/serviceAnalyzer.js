@@ -77,97 +77,59 @@ const ServiceAnalyzer = (function () {
      * @param {Array} javaFiles - Array of Java files with name and content properties
      * @returns {Object} - Mapping of bean method names to method definitions
      */
+    // Cập nhật cho parseJavaBeans trong serviceAnalyzer.js để sử dụng parseJavaMethods hiện có
     function parseJavaBeans(javaFiles) {
         const beanMethods = {};
 
         for (const file of javaFiles) {
             const content = file.content;
-            console.log(content);
-            console.log("====>");
-            let methods = parseJavaMethods(content);
-            console.log(methods);
 
-            // Extract class annotation to identify Spring beans
-            const classAnnotationMatch = content.match(/@(Controller|Service|Component|Repository)(?:\([^)]*\))?\s+(?:public\s+)?class\s+(\w+)/);
+            // Trích xuất thông tin lớp để xác định Spring bean
+            const classAnnotationMatch = content.match(/@(Controller|Service|Component|Repository|RestController)(?:\([^)]*\))?\s+(?:public\s+)?class\s+(\w+)/);
 
             if (classAnnotationMatch) {
                 const beanType = classAnnotationMatch[1];
                 const beanName = classAnnotationMatch[2];
 
-                // First, find method starting positions
-                const methodPattern = /@(?:RequestMapping|GetMapping|PostMapping|PutMapping|DeleteMapping|Transactional)(?:\([^)]*\))?\s+(?:public|protected|private)\s+(?:<[^>]+>\s+)?(\w+(?:<[^>]+>)?)\s+(\w+)\s*\(/g;
+                // Trích xuất package từ content
+                const packageMatch = content.match(/package\s+([\w\.]+);/);
+                const packageName = packageMatch ? packageMatch[1] : "";
 
-                let methodMatch;
-                const methodStarts = [];
+                // Sử dụng hàm parseJavaMethods đã có
+                const methods = parseJavaMethods(content);
+                console.log(methods);
 
-                while ((methodMatch = methodPattern.exec(content)) !== null) {
-                    methodStarts.push({
-                        returnType: methodMatch[1],
-                        methodName: methodMatch[2],
-                        startPos: methodMatch.index
-                    });
-                }
-
-                // Now for each method start, find the complete method body
-                for (const method of methodStarts) {
-                    // Search for the opening parenthesis of parameters
-                    const paramStartPos = content.indexOf('(', method.startPos);
-                    if (paramStartPos === -1) continue;
-
-                    // Find the matching closing parenthesis
-                    let paramEndPos = paramStartPos + 1;
-                    let parenCount = 1;
-
-                    while (parenCount > 0 && paramEndPos < content.length) {
-                        if (content[paramEndPos] === '(') parenCount++;
-                        if (content[paramEndPos] === ')') parenCount--;
-                        paramEndPos++;
-                    }
-
-                    if (parenCount !== 0) continue; // Malformed method
-
-                    // Extract parameters
-                    const paramsText = content.substring(paramStartPos + 1, paramEndPos - 1).trim();
-                    const parameters = paramsText.split(',').map(p => p.trim()).filter(p => p);
-
-                    // Now find the opening brace of the method body
-                    const bodyStartPos = content.indexOf('{', paramEndPos);
-                    if (bodyStartPos === -1) continue;
-
-                    // Find the matching closing brace
-                    let bodyEndPos = bodyStartPos + 1;
-                    let braceCount = 1;
-
-                    while (braceCount > 0 && bodyEndPos < content.length) {
-                        if (content[bodyEndPos] === '{') braceCount++;
-                        if (content[bodyEndPos] === '}') braceCount--;
-                        bodyEndPos++;
-                    }
-
-                    if (braceCount !== 0) continue; // Malformed method
-
-                    // Extract the complete method from beginning to end
-                    const methodStart = content.lastIndexOf('@', method.startPos);
-                    const fullMethod = content.substring(methodStart, bodyEndPos);
-
-                    // Extract just the annotation part
-                    const annotationEndPos = content.indexOf('\n', methodStart);
-                    const annotation = content.substring(methodStart, annotationEndPos);
-
-                    // Create unique key for bean method
+                // Tích hợp kết quả vào beanMethods
+                methods.forEach(method => {
+                    // Tạo khóa duy nhất cho bean method
                     const key = `${beanName}.${method.methodName}`;
+
+                    // Chuyển đổi tham số từ chuỗi thành một mảng các đối tượng
+                    const paramString = method.parameters || '';
+                    const paramArray = paramString.split(',').filter(p => p.trim()).map(param => {
+                        const parts = param.trim().split(/\s+/);
+                        if (parts.length >= 2) {
+                            return {
+                                type: parts.slice(0, parts.length-1).join(' '),
+                                name: parts[parts.length-1]
+                            };
+                        }
+                        return { type: 'Unknown', name: param.trim() };
+                    });
 
                     beanMethods[key] = {
                         beanName: beanName,
                         beanType: beanType,
                         methodName: method.methodName,
                         returnType: method.returnType,
-                        parameters: parameters,
-                        fullImplementation: fullMethod,
-                        annotation: annotation,
+                        packageName: packageName,
+                        parameterString: method.parameters,
+                        parameters: paramArray,
+                        fullImplementation: method.fullMethod,
+                        annotations: method.annotations,
                         file: file.name
                     };
-                }
+                });
             }
         }
 
@@ -184,15 +146,15 @@ const ServiceAnalyzer = (function () {
 
         if (!mapping) {
             return `
-           <div class="service-detail-card">
-               <div class="service-detail-header">
-                   <h4>Backend Implementation</h4>
-               </div>
-               <div class="service-detail-content">
-                   <p class="no-data-message">No backend mapping found for service ID: ${escapeHtml(svcId)}</p>
-               </div>
-           </div>
-       `;
+      <div class="service-detail-card">
+          <div class="service-detail-header">
+              <h4>Backend Implementation</h4>
+          </div>
+          <div class="service-detail-content">
+              <p class="no-data-message">No backend mapping found for service ID: ${escapeHtml(svcId)}</p>
+          </div>
+      </div>
+    `;
         }
 
         let implementationContent = '';
@@ -200,104 +162,124 @@ const ServiceAnalyzer = (function () {
         if (mapping.type === 'query' && mapping.queryIds.length > 0) {
             // SQL Implementation
             implementationContent = `
-           <div class="implementation-type">
-               <span class="implementation-badge sql">SQL Query</span>
-           </div>
-           <div class="query-list">
-               ${mapping.queryIds.map(queryId => {
+      <div class="implementation-type">
+          <span class="implementation-badge sql">SQL Query</span>
+      </div>
+      <div class="query-list">
+          ${mapping.queryIds.map(queryId => {
                 const query = queryDefinitions[queryId];
                 if (query) {
                     // Apply syntax highlighting to SQL
                     const highlightedSql = applySqlSyntaxHighlighting(query.sql);
 
                     return `
-                           <div class="query-detail-card">
-                               <div class="query-header">
-                                   <div class="query-title">
-                                       <span class="query-type-badge ${query.type}">${query.type.toUpperCase()}</span>
-                                       <h5>${queryId}</h5>
-                                   </div>
-                                   <div class="query-file">${query.file}</div>
-                               </div>
-                               <div class="code-block sql-code with-line-numbers">
-                                   <button class="copy-button" onclick="copyToClipboard(this)">Copy</button>
-                                   <pre><code>${highlightedSql}</code></pre>
-                               </div>
-                           </div>
-                       `;
+                <div class="query-detail-card">
+                    <div class="query-header">
+                        <div class="query-title">
+                            <span class="query-type-badge ${query.type}">${query.type.toUpperCase()}</span>
+                            <h5>${queryId}</h5>
+                        </div>
+                        <div class="query-file">${query.file}</div>
+                    </div>
+                    <div class="code-block sql-code with-line-numbers">
+                        <button class="copy-button" onclick="copyToClipboard(this)">Copy</button>
+                        <pre><code>${highlightedSql}</code></pre>
+                    </div>
+                </div>
+              `;
                 } else {
                     return `<p class="query-not-found">Query definition for ID "${queryId}" not found.</p>`;
                 }
             }).join('')}
-           </div>
-       `;
+      </div>
+    `;
         } else if (mapping.beanName && mapping.methodName) {
             // Java Bean Implementation
             const methodKey = `${mapping.beanName}.${mapping.methodName}`;
             const method = beanMethods[methodKey];
 
             implementationContent = `
-           <div class="implementation-type">
-               <span class="implementation-badge java">Java Method</span>
-           </div>
-           <div class="bean-detail-card">
-               <div class="bean-header">
-                   <div class="bean-title">
-                       <h5>${mapping.beanName}.${mapping.methodName}()</h5>
-                       ${method ? `<span class="bean-type-badge">${method.beanType}</span>` : ''}
-                   </div>
-                   ${method ? `<div class="bean-file">${method.file}</div>` : ''}
-               </div>
-               ${method ? `
-               <div class="bean-details">
-                   <div class="method-implementation">
-                       <div class="code-block java-code with-line-numbers">
-                           <button class="copy-button" onclick="copyToClipboard(this)">Copy</button>
-                           <pre><code>${method.fullImplementation ? applyJavaSyntaxHighlighting(method.fullImplementation) : '// Implementation not available'}</code></pre>
-                       </div>
-                   </div>
-               </div>
-               ` : '<p class="method-not-found">Method details not found.</p>'}
-           </div>
-           
-           ${method && method.relatedMethods && method.relatedMethods.length > 0 ? `
-           <div class="related-methods">
-               <h6>Related Methods</h6>
-               <div class="related-method-list">
-                   ${method.relatedMethods.map(relatedMethod => `
-                       <div class="related-method-item">
-                           <div class="related-method-name">${relatedMethod.name}</div>
-                           <div class="related-method-signature">${relatedMethod.signature}</div>
-                       </div>
-                   `).join('')}
-               </div>
-           </div>
-           ` : ''}
-       `;
+      <div class="implementation-type">
+          <span class="implementation-badge java">Java Method</span>
+      </div>
+      <div class="bean-detail-card">
+          <div class="bean-header">
+              <div class="bean-title">
+                  <h5>${mapping.beanName}.${mapping.methodName}()</h5>
+                  ${method ? `<span class="bean-type-badge">${method.beanType}</span>` : ''}
+              </div>
+              ${method ? `<div class="bean-file">${method.file}</div>` : ''}
+          </div>
+          ${method ? `
+          <div class="bean-details">
+              <div class="method-info">
+                  <h6>Method Information</h6>
+                  <div class="bean-method-signature">
+                      ${method.annotations ? `<div class="method-annotations">${escapeHtml(method.annotations)}</div>` : ''}
+                      <div class="method-declaration">
+                          <span class="return-type">${escapeHtml(method.returnType)}</span> 
+                          <span class="method-name">${escapeHtml(method.methodName)}</span>(
+                          <span class="parameters">${escapeHtml(method.parameterString || '')}</span>)
+                      </div>
+                  </div>
+              </div>
+              <div class="method-implementation">
+                  <h6>Full Implementation</h6>
+                  <div class="code-block java-code with-line-numbers">
+                      <button class="copy-button" onclick="copyToClipboard(this)">Copy</button>
+                      <pre><code>${method.fullMethod ? applyJavaSyntaxHighlighting(method.fullMethod) : '// Implementation not available'}</code></pre>
+                  </div>
+              </div>
+              ${method.packageName ? `
+              <div class="package-info">
+                  <h6>Package</h6>
+                  <div class="package-name">${escapeHtml(method.packageName)}</div>
+              </div>
+              ` : ''}
+          </div>
+          ` : '<p class="method-not-found">Method details not found.</p>'}
+      </div>
+      
+      ${method && method.relatedMethods && method.relatedMethods.length > 0 ? `
+      <div class="related-methods">
+          <h6>Related Methods</h6>
+          <div class="related-method-list">
+              ${method.relatedMethods.map(relatedMethod => `
+                  <div class="related-method-item">
+                      <div class="related-method-name">${relatedMethod.name}</div>
+                      <div class="related-method-signature">${relatedMethod.signature}</div>
+                  </div>
+              `).join('')}
+          </div>
+      </div>
+      ` : ''}
+    `;
         }
 
         // Project metadata as a collapsed section
         const metadataSection = `
-       <details class="metadata-details">
-           <summary>Project Structure Metadata</summary>
-           <div class="metadata-content">
-               <p><strong>Project:</strong> ${mapping.projectId}</p>
-               <p><strong>Module:</strong> ${mapping.moduleId}</p>
-               <p><strong>Program:</strong> ${mapping.programId}</p>
-               <p><strong>Page:</strong> ${mapping.pageId}</p>
-           </div>
-       </details>
-   `;
+    <details class="metadata-details">
+        <summary>Project Structure Metadata</summary>
+        <div class="metadata-content">
+            <p><strong>Project:</strong> ${mapping.projectId}</p>
+            <p><strong>Module:</strong> ${mapping.moduleId}</p>
+            <p><strong>Program:</strong> ${mapping.programId}</p>
+            <p><strong>Page:</strong> ${mapping.pageId}</p>
+            ${mapping.beanName ? `<p><strong>Bean Name:</strong> ${mapping.beanName}</p>` : ''}
+            ${mapping.methodName ? `<p><strong>Method Name:</strong> ${mapping.methodName}</p>` : ''}
+        </div>
+    </details>
+  `;
 
         return `
-       <div class="service-details">
-           <h3>Backend Implementation</h3>
-           <div class="service-implementation">
-               ${implementationContent}
-           </div>
-           ${metadataSection}
-       </div>
-   `;
+    <div class="service-details">
+        <h3>Backend Implementation</h3>
+        <div class="service-implementation">
+            ${implementationContent}
+        </div>
+        ${metadataSection}
+    </div>
+  `;
     }
 
     // Simple SQL syntax highlighting function
