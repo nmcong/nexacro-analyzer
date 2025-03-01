@@ -440,20 +440,21 @@ const ServiceAnalyzer = (function () {
     }
 
     function parseJavaMethods(javaCode) {
-        // Xóa comments để tránh ảnh hưởng đến regex
+        // Xóa comments để tránh ảnh hưởng regex
         javaCode = javaCode.replace(/\/\*[\s\S]*?\*\//g, '');
         javaCode = javaCode.replace(/\/\/.*/g, '');
 
-        const methodRegex = /(@Transactional\([^)]*\)|@Transactional)?\s*public\s+([\w<>,\s]+?)\s+(\w+)\s*\(([^)]*)\)\s*{/g;
+        // Regex cải tiến: Bắt mọi annotation (không chỉ @Transactional)
+        const methodRegex = /((?:@\w+(?:\([^)]*\))?\s*)*)\s*public\s+([\w<>,\s]+?)\s+(\w+)\s*\(([^)]*)\)\s*{/g;
         const methods = [];
         let match;
 
         while ((match = methodRegex.exec(javaCode)) !== null) {
-            const startIdx = match.index; // Bắt đầu từ đầu phương thức
+            const startIdx = match.index; // Bắt đầu từ annotation đầu tiên (nếu có)
             let braceCount = 1;
-            let endIdx = startIdx + match[0].length; // Bỏ qua phần đã match trước đó
+            let endIdx = startIdx + match[0].length;
 
-            // Tìm điểm kết thúc của method
+            // Đếm số dấu {} để xác định body
             while (braceCount > 0 && endIdx < javaCode.length) {
                 const char = javaCode[endIdx];
                 if (char === '{') braceCount++;
@@ -461,12 +462,12 @@ const ServiceAnalyzer = (function () {
                 endIdx++;
             }
 
-            // Lấy toàn bộ nội dung method
+            // Lấy toàn bộ method (từ annotation đến })
             const fullMethod = javaCode.substring(startIdx, endIdx).trim();
 
             methods.push({
-                fullMethod: fullMethod, // Trả về toàn bộ method
-                annotation: match[1]?.trim() || '',
+                fullMethod: fullMethod,
+                annotations: match[1].trim(), // Tất cả annotation (nếu có)
                 returnType: match[2].trim(),
                 methodName: match[3].trim(),
                 parameters: match[4].trim()
