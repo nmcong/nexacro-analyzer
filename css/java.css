@@ -1,0 +1,43 @@
+.method-container {
+    font-family: 'Courier New', monospace;
+    margin: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: #f8f9fa;
+}
+
+.method-header {
+    padding: 10px;
+    background: #e9ecef;
+    border-bottom: 1px solid #ddd;
+}
+
+.annotation {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+.return-type {
+    color: #2f6f9f;
+    font-weight: bold;
+}
+
+.method-name {
+    color: #4a6baf;
+    font-weight: bold;
+}
+
+.parameters {
+    color: #3a9f9f;
+}
+
+.method-body {
+    padding: 10px;
+    background: white;
+    overflow-x: auto;
+}
+
+.method-body pre {
+    margin: 0;
+    white-space: pre-wrap;
+}

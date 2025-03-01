@@ -97,7 +97,6 @@ const ServiceAnalyzer = (function () {
 
                 // Sử dụng hàm parseJavaMethods đã có
                 const methods = parseJavaMethods(content);
-                console.log(methods);
 
                 // Tích hợp kết quả vào beanMethods
                 methods.forEach(method => {
@@ -125,7 +124,7 @@ const ServiceAnalyzer = (function () {
                         packageName: packageName,
                         parameterString: method.parameters,
                         parameters: paramArray,
-                        fullImplementation: method.fullMethod,
+                        fullMethod: method.fullMethod,
                         annotations: method.annotations,
                         file: file.name
                     };
@@ -176,13 +175,12 @@ const ServiceAnalyzer = (function () {
                 <div class="query-detail-card">
                     <div class="query-header">
                         <div class="query-title">
-                            <span class="query-type-badge ${query.type}">${query.type.toUpperCase()}</span>
                             <h5>${queryId}</h5>
+                            <span class="query-type-badge ${query.type}">${query.type.toUpperCase()}</span>
                         </div>
                         <div class="query-file">${query.file}</div>
                     </div>
                     <div class="code-block sql-code with-line-numbers">
-                        <button class="copy-button" onclick="copyToClipboard(this)">Copy</button>
                         <pre><code>${highlightedSql}</code></pre>
                     </div>
                 </div>
@@ -197,6 +195,7 @@ const ServiceAnalyzer = (function () {
             // Java Bean Implementation
             const methodKey = `${mapping.beanName}.${mapping.methodName}`;
             const method = beanMethods[methodKey];
+            console.log(method);
 
             implementationContent = `
       <div class="implementation-type">
@@ -205,37 +204,17 @@ const ServiceAnalyzer = (function () {
       <div class="bean-detail-card">
           <div class="bean-header">
               <div class="bean-title">
-                  <h5>${mapping.beanName}.${mapping.methodName}()</h5>
-                  ${method ? `<span class="bean-type-badge">${method.beanType}</span>` : ''}
+                  <h5>${mapping.methodName}()</h5>
+                  ${method ? `<span class="bean-type-badge">${escapeHtml(method.packageName)}.${method.file}</span>` : ''}
               </div>
-              ${method ? `<div class="bean-file">${method.file}</div>` : ''}
           </div>
           ${method ? `
           <div class="bean-details">
-              <div class="method-info">
-                  <h6>Method Information</h6>
-                  <div class="bean-method-signature">
-                      ${method.annotations ? `<div class="method-annotations">${escapeHtml(method.annotations)}</div>` : ''}
-                      <div class="method-declaration">
-                          <span class="return-type">${escapeHtml(method.returnType)}</span> 
-                          <span class="method-name">${escapeHtml(method.methodName)}</span>(
-                          <span class="parameters">${escapeHtml(method.parameterString || '')}</span>)
-                      </div>
-                  </div>
-              </div>
               <div class="method-implementation">
-                  <h6>Full Implementation</h6>
                   <div class="code-block java-code with-line-numbers">
-                      <button class="copy-button" onclick="copyToClipboard(this)">Copy</button>
-                      <pre><code>${method.fullMethod ? applyJavaSyntaxHighlighting(method.fullMethod) : '// Implementation not available'}</code></pre>
+                      <pre><code>${method ? applyJavaSyntaxHighlighting(method) : '// Implementation not available'}</code></pre>
                   </div>
               </div>
-              ${method.packageName ? `
-              <div class="package-info">
-                  <h6>Package</h6>
-                  <div class="package-name">${escapeHtml(method.packageName)}</div>
-              </div>
-              ` : ''}
           </div>
           ` : '<p class="method-not-found">Method details not found.</p>'}
       </div>
@@ -325,58 +304,20 @@ const ServiceAnalyzer = (function () {
         return highlighted;
     }
 
-    function applyJavaSyntaxHighlighting(java) {
-        if (!java) return '';
+    function applyJavaSyntaxHighlighting(method) {
+        if (!method) return '';
 
-        // Escape HTML first
-        let highlighted = escapeHtml(java);
+        const methodDiv = document.createElement('div');
+        methodDiv.className = 'method-container';
 
-        // Java keywords
-        const keywords = [
-            'public', 'private', 'protected', 'class', 'interface', 'enum', 'extends',
-            'implements', 'return', 'if', 'else', 'for', 'while', 'do', 'switch', 'case',
-            'break', 'continue', 'new', 'try', 'catch', 'finally', 'throw', 'throws', 'this',
-            'super', 'static', 'final', 'void', 'null', 'true', 'false', 'import', 'package'
-        ];
+        const body = document.createElement('div');
+        body.className = 'method-body';
+        const pre = document.createElement('pre');
+        pre.textContent = method.fullMethod;
+        body.appendChild(pre);
 
-        // Types
-        const types = [
-            'String', 'int', 'long', 'double', 'float', 'boolean', 'byte', 'char', 'short',
-            'Integer', 'Long', 'Double', 'Float', 'Boolean', 'Byte', 'Character', 'Short',
-            'List', 'Map', 'Set', 'Collection', 'ArrayList', 'HashMap', 'Object'
-        ];
-
-        // Highlight annotations first (they may contain parentheses which could interfere with other patterns)
-        highlighted = highlighted.replace(/@\w+(\([^)]*\))?/g, match => `<span class="annotation">${match}</span>`);
-
-        // Apply keyword highlighting
-        keywords.forEach(keyword => {
-            const regex = new RegExp(`\\b${keyword}\\b`, 'g');
-            highlighted = highlighted.replace(regex, `<span class="keyword">${keyword}</span>`);
-        });
-
-        // Apply type highlighting
-        types.forEach(type => {
-            const regex = new RegExp(`\\b${type}\\b`, 'g');
-            highlighted = highlighted.replace(regex, `<span class="type">${type}</span>`);
-        });
-
-        // Highlight method names (after return type and before parentheses)
-        highlighted = highlighted.replace(/(\s+)(\w+)(\s*\()/g, (match, space, name, paren) => {
-            return `${space}<span class="function">${name}</span>${paren}`;
-        });
-
-        // Highlight strings
-        highlighted = highlighted.replace(/"([^"]*)"/g, `"<span class="string">$1</span>"`);
-
-        // Highlight numbers
-        highlighted = highlighted.replace(/\b(\d+)\b/g, `<span class="number">$1</span>`);
-
-        // Highlight comments
-        highlighted = highlighted.replace(/\/\/(.*)$/gm, `<span class="comment">//$1</span>`);
-        highlighted = highlighted.replace(/\/\*([\s\S]*?)\*\//g, `<span class="comment">/*$1*/</span>`);
-
-        return highlighted;
+        methodDiv.appendChild(body);
+        return methodDiv.innerHTML;
     }
 
     // Copy to clipboard function (add to your script)
